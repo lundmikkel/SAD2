@@ -23,23 +23,38 @@ public class Knapsack {
             System.out.println(i + " : w: " + i.getWeight() + " v: " + i.getValue());
         System.out.println();
 
-        Set<Item> result = knapsack(items, W);
+        Set<Item> result = knapsack(items, W, 0.1, new Knapsacker<Item>() {
+            @Override
+            public int getWeight(Item item) {
+                return item.getWeight();
+            }
+
+            @Override
+            public double getValue(Item item) {
+                return item.getValue();
+            }
+        });
         System.out.println("Result:");
         for (Item i : result)
             System.out.print(i + " ");
         System.out.println();
     }
 
-    public static <T extends Knapsackable> Set<T> knapsack(List<T> items, int W) {
+    public static <T> Set<T> knapsack(List<T> items, int W, double scalingFactor, Knapsacker<T> knapsacker) {
+        //int maxWeight = items.stream().mapToInt(i -> i.getWeight()).max().getAsInt();
+        //double scalingFactor = precision * maxWeight / items.size();
+        W = (int)Math.floor(W/scalingFactor);
+
         System.out.println("Allocating of size: " + (4 * ((W + 1) * (items.size() + 1))) + " Byte");
 
         double[][] cache = new double[items.size() + 1][W + 1];
         for (int item = 1, size = items.size(); item <= size; ++item) {
             for (int w = 0; w <= W; ++w) {
                 T i = items.get(item - 1);
-                if (i.getWeight() <= w) {
+                int wi = (int) Math.ceil(knapsacker.getWeight(i)/scalingFactor);
+                if (wi <= w) {
                     double notSelected = cache[item - 1][w];
-                    double selected = i.getValue() + cache[item - 1][w - i.getWeight()];
+                    double selected = knapsacker.getValue(i) + cache[item - 1][w - wi];
                     cache[item][w] = Math.max(notSelected, selected);
                 }
             }
@@ -59,11 +74,12 @@ public class Knapsack {
 
         Set<T> result = new HashSet<>();
         for (int item = items.size(), w = W; 0 < item; --item) {
-            if (items.get(item - 1).getWeight() <= w) {
-                double actual = cache[item - 1][w - items.get(item - 1).getWeight()];
-                double expected = cache[item][w] - items.get(item - 1).getValue();
+            int wi = (int) Math.ceil(knapsacker.getWeight(items.get(item - 1)) / scalingFactor);
+            if (wi <= w) {
+                double actual = cache[item - 1][w - wi];
+                double expected = cache[item][w] - knapsacker.getValue(items.get(item - 1));
                 if (actual == expected) {
-                    w -= items.get(item - 1).getWeight();
+                    w -= wi;
                     result.add(items.get(item - 1));
                 }
             }

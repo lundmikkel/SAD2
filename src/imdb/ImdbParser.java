@@ -1,6 +1,7 @@
 package imdb;
 
 import knapsack.Knapsack;
+import knapsack.Knapsacker;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -136,17 +137,28 @@ public class ImdbParser {
     public static void main(String[] args) {
         Parse("dataset/imdb-r.txt");
         List<Movie> movies = Movie.getAll().stream()
-                .filter(m -> m.getValue() >= 9)
+                .filter(m -> m.getRating() >= 9)
                 .collect(Collectors.toList());
-        Knapsack.knapsack(movies, 60_000).forEach(System.out::println);
+
+        Knapsack.knapsack(movies, 60_000, 10, new Knapsacker<Movie>() {
+            @Override
+            public int getWeight(Movie movie) {
+                return movie.getDuration();
+            }
+
+            @Override
+            public double getValue(Movie movie) {
+                return movie.getRating();
+            }
+        }).forEach(System.out::println);
 
         final AtomicInteger W = new AtomicInteger(60_000);
         Set<Movie> solution = new HashSet<>();
-        movies.sort((m1, m2) -> m2.getWeight() - m1.getWeight());
+        movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
         movies.forEach(m -> {
-            if (m.getWeight() <= W.get()) {
+            if (m.getDuration() <= W.get()) {
                 solution.add(m);
-                W.addAndGet(-m.getWeight());
+                W.addAndGet(-m.getDuration());
             }
         });
         movies.forEach(System.out::println);
