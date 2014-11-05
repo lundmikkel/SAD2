@@ -1,14 +1,17 @@
 package imdb;
 
 import knapsack.Knapsack;
+import knapsack.KnapsackHelper;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /*
@@ -134,9 +137,31 @@ public class ImdbParser {
     public static void main(String[] args) {
         Parse("dataset/imdb-r.txt");
         List<Movie> movies = Movie.getAll().stream()
-                .filter(m -> m.getValue() >= 9)
+                .filter(m -> m.getRating() >= 9)
                 .collect(Collectors.toList());
-        Knapsack.knapsack(movies, 1000, 10).forEach(System.out::println);
+
+        Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
+            @Override
+            public int getWeight(Movie movie) {
+                return movie.getDuration();
+            }
+
+            @Override
+            public double getValue(Movie movie) {
+                return movie.getRating();
+            }
+        }).forEach(System.out::println);
+
+        final AtomicInteger W = new AtomicInteger(60_000);
+        Set<Movie> solution = new HashSet<>();
+        movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
+        movies.forEach(m -> {
+            if (m.getDuration() <= W.get()) {
+                solution.add(m);
+                W.addAndGet(-m.getDuration());
+            }
+        });
+        movies.forEach(System.out::println);
     }
 
     private static String[] ParseLine(String line) {
