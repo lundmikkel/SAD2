@@ -8,21 +8,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
- *
  * @author marcher89
  */
 public class ImdbParser {
 
     public static void Parse(String filename) {
         int dnf = 0, mnf = 0, anf = 0,
-            df = 0, mf = 0, af = 0;
+                df = 0, mf = 0, af = 0;
         try {
             BufferedReader r = new BufferedReader(new FileReader(filename));
             String line = r.readLine();
@@ -132,8 +133,10 @@ public class ImdbParser {
 
     public static void main(String[] args) {
         Parse("dataset/imdb-r.txt");
-        for (Movie m : Knapsack.knapsack(Movie.getAll().stream().filter(mi -> mi.getValue() > 0).collect(Collectors.toList()), 50000, 507))
-            System.out.println(m.getTitle()+": "+m.getDuration()+" min - Rating: "+m.getRating());
+        List<Movie> movies = Movie.getAll().stream()
+                .filter(m -> m.getValue() >= 9)
+                .collect(Collectors.toList());
+        Knapsack.knapsack(movies, 1000, 10).forEach(System.out::println);
     }
 
     private static String[] ParseLine(String line) {
@@ -153,6 +156,8 @@ public class ImdbParser {
                     sb.deleteCharAt(sb.length() - 1);
                 } else if (currPos + 2 < line.length()
                         && line.substring(currPos, currPos + 2).equals("\\'") && quoted) {
+                    sb.deleteCharAt(sb.length() - 1);
+                    sb.append('\'');
                     currPos++;
                     //System.out.println("skipping ");
                 } else if (line.charAt(currPos) == ',' && !quoted) {
