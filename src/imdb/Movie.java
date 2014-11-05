@@ -11,7 +11,7 @@ public class Movie {
     private final String title;
     private final int year;
     // Negative values mean undefined
-    private final float rank;
+    private final float rating;
     private final int duration;
     private final Set<Director> directors = new HashSet<>();
     private final Set<String> genres = new HashSet<>();
@@ -21,7 +21,7 @@ public class Movie {
 
     // region Constructor
 
-    public Movie(int id, String title, int year, float rank, int duration) {
+    public Movie(int id, String title, int year, float rating, int duration) {
         if (id < 0)
             throw new IllegalArgumentException("id must be non-negative");
         if (title == null)
@@ -34,7 +34,7 @@ public class Movie {
         this.id = id;
         this.title = title;
         this.year = year;
-        this.rank = rank;
+        this.rating = rating;
         this.duration = duration;
 
         instances.put(id, this);
@@ -56,8 +56,8 @@ public class Movie {
         return year;
     }
 
-    public float getRank() {
-        return rank;
+    public float getRating() {
+        return rating;
     }
 
     public int getDuration() {
