@@ -4,7 +4,7 @@ import knapsack.Knapsackable;
 
 import java.util.*;
 
-public class Movie implements Knapsackable {
+public class Movie {
     private final static Map<Integer, Movie> instances = new HashMap<>();
 
     // region Fields
@@ -131,16 +131,6 @@ public class Movie implements Knapsackable {
     @Override
     public int hashCode() {
         return id;
-    }
-
-    @Override
-    public int getWeight() {
-        return getDuration();
-    }
-
-    @Override
-    public double getValue() {
-        return getRating();
     }
 
     // endregion
