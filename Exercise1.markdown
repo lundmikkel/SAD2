@@ -23,7 +23,8 @@ This would only allow 1 video, and at most allow for O(W/2) space to be used.
 Maximum knapsack from the compendium
 
 
-4. What happens if Alan wants to select movies in order to maximize the sum of the movie ratings, without exceeding the available W minutes? Propose and implement an algorithm. Can your algorithm guarantee a certain quality of answer?
+4. What happens if Alan wants to select movies in order to maximize the sum of the movie ratings, without exceeding the available W minutes? 
+Propose and implement an algorithm. Can your algorithm guarantee a certain quality of answer?
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Knapsack problem
 wi : time in minutes
