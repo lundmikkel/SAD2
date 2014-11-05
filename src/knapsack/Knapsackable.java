@@ -5,5 +5,5 @@ package knapsack;
  */
 public interface Knapsackable {
     public int getWeight();
-    public int getValue();
+    public double getValue();
 }

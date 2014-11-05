@@ -8,7 +8,7 @@ import java.util.*;
 public class Knapsack {
     public static void main(String[] args)
     {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
                           //id ,W,v
         items.add(new Item("1", 1,2));
         items.add(new Item("2", 1,2));
@@ -27,17 +27,17 @@ public class Knapsack {
             System.out.println(i + " : w: " + i.getWeight() + " v: " + i.getValue());
         System.out.println();
 
-        Set<Knapsackable> result = knapsack(items, W);
+        Set<Item> result = knapsack(items, W);
         System.out.println("Result:");
-        for (Knapsackable i : result)
+        for (Item i : result)
             System.out.print(i + " ");
         System.out.println();
     }
 
-    public static Set<Knapsackable> knapsack(List<? extends Knapsackable> items, int W)
+    public static <T extends Knapsackable> Set<T> knapsack(List<T> items, int W)
     {
-        System.out.println("Allocating of size: " + ((W+1) * (items.size()+1)));
-        int[][] cache = new int[items.size()+1][W+1];
+        System.out.println("Allocating of size: " + (4*((W+1) * (items.size()+1))) + " Byte");
+        double[][] cache = new double[items.size()+1][W+1];
         System.out.println("Array allocated of size: " + ((W+1) * (items.size()+1)));
         for (int item = 1; item <= items.size(); item++){
             for (int w = 0; w <= W; w++)
@@ -58,9 +58,10 @@ public class Knapsack {
             System.out.println(Arrays.toString(cache[item]));
         }
         System.out.println();*/
-        Set<Knapsackable> result = new HashSet<>();
+        Set<T> result = new HashSet<>();
         for (int item = items.size(), w = W; item > 0 && w > 0; item--)
         {
+            if (items.get(item-1).getWeight() > w) continue;
             if (cache[item-1][w-items.get(item-1).getWeight()] == cache[item][w]-items.get(item-1).getValue()) {
                 w -= items.get(item - 1).getWeight();
                 result.add(items.get(item - 1));

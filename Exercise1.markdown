@@ -13,8 +13,8 @@ Maximum Subset Sum
         if movie run time is less than remaining space in W
             select it
 
-The worst case is that all videos are (W/2)+1 minutes.
-This would only allow 1 video, and at most allow for O(W/2) space to be used.
+The worst case is that all videos are `(W/2)+1` minutes.
+This would only allow 1 video, and at most allow for `O(W/2)` space to be used.
 
 
 3. Suggest a dynamic programming exact algorithm for this problem.
@@ -24,18 +24,10 @@ Maximum knapsack from the compendium
 
 4. What happens if Alan wants to select movies in order to maximize the sum of the movie ratings, without exceeding the available W minutes? Propose and implement an algorithm. Can your algorithm guarantee a certain quality of answer?
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Knapsack problem
-wi : time in minutes
-vi : movie rating
+	Knapsack problem
+	wi : time in minutes
+	vi : movie rating
 
 
-5. Compare the sorting algorithm and the dynamic programming algorithm on the real datasets
--------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
+5. Compare the sorting algorithm and the dynamic programming algorithm on the real data sets
+--------------------------------------------------------------------------------------------
