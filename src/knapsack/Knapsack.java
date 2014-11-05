@@ -45,7 +45,7 @@ public class Knapsack {
         //double scalingFactor = precision * maxWeight / items.size();
         W = (int)Math.floor(W/scalingFactor);
 
-        System.out.println("Allocating of size: " + (4 * ((W + 1) * (items.size() + 1))) + " Byte");
+        System.out.printf(Locale.US, "Allocating of size: %,d Byte\n", 4 * (W + 1) * (items.size() + 1));
 
         double[][] cache = new double[items.size() + 1][W + 1];
         for (int item = 1, size = items.size(); item <= size; ++item) {
