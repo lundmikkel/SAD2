@@ -3,7 +3,7 @@ package imdb;
 import java.util.*;
 
 public class Movie {
-    private final static Map<Integer, Movie> instances = new HashMap<Integer, Movie>();
+    private final static Map<Integer, Movie> instances = new HashMap<>();
 
     // region Fields
 
@@ -13,9 +13,9 @@ public class Movie {
     // Negative values mean undefined
     private final float rank;
     private final int duration;
-    private final Set<Director> directors = new HashSet<Director>();
-    private final Set<String> genres = new HashSet<String>();
-    private final Set<Role> roles = new HashSet<Role>();
+    private final Set<Director> directors = new HashSet<>();
+    private final Set<String> genres = new HashSet<>();
+    private final Set<Role> roles = new HashSet<>();
 
     // endregion
 

@@ -3,7 +3,7 @@ package imdb;
 import java.util.*;
 
 public class Actor extends Person {
-    private final static Map<Integer, Actor> instances = new HashMap<Integer, Actor>();
+    private final static Map<Integer, Actor> instances = new HashMap<>();
 
     // region Fields
 
@@ -28,7 +28,7 @@ public class Actor extends Person {
         this.movieCount = movieCount;
 
         // The set size should equal the movie count
-        roles = new HashSet<Role>(movieCount);
+        roles = new HashSet<>(movieCount);
 
         instances.put(id, this);
     }

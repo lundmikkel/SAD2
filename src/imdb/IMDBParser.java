@@ -1,9 +1,11 @@
 package imdb;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * To change this template, choose Tools | Templates
@@ -13,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author marcher89
  */
-public class IMDBParser {
+public class ImdbParser {
 
     public static void Parse(String filename) {
         int dnf = 0, mnf = 0, anf = 0,

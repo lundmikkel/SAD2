@@ -3,12 +3,12 @@ package imdb;
 import java.util.*;
 
 public class Director extends Person {
-    private final static Map<Integer, Director> instances = new HashMap<Integer, Director>();
+    private final static Map<Integer, Director> instances = new HashMap<>();
 
     // region Fields
 
-    private final Set<String> genres = new HashSet<String>();
-    private final Set<Movie> movies = new HashSet<Movie>();
+    private final Set<String> genres = new HashSet<>();
+    private final Set<Movie> movies = new HashSet<>();
 
     // endregion
 
