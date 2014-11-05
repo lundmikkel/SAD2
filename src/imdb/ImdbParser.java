@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /*
@@ -136,7 +138,18 @@ public class ImdbParser {
         List<Movie> movies = Movie.getAll().stream()
                 .filter(m -> m.getValue() >= 9)
                 .collect(Collectors.toList());
-        Knapsack.knapsack(movies, 1000).forEach(System.out::println);
+        Knapsack.knapsack(movies, 60_000).forEach(System.out::println);
+
+        final AtomicInteger W = new AtomicInteger(60_000);
+        Set<Movie> solution = new HashSet<>();
+        movies.sort((m1, m2) -> m2.getWeight() - m1.getWeight());
+        movies.forEach(m -> {
+            if (m.getWeight() <= W.get()) {
+                solution.add(m);
+                W.addAndGet(-m.getWeight());
+            }
+        });
+        movies.forEach(System.out::println);
     }
 
     private static String[] ParseLine(String line) {
