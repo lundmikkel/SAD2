@@ -2,9 +2,6 @@ package knapsack;
 
 import java.util.*;
 
-/**
- * Created by Rasmus on 31-10-2014.
- */
 public class Knapsack {
     public static void main(String[] args) {
         List<Item> items = new ArrayList<>();
