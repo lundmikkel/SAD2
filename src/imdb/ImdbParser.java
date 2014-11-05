@@ -1,7 +1,7 @@
 package imdb;
 
 import knapsack.Knapsack;
-import knapsack.Knapsacker;
+import knapsack.KnapsackHelper;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -140,7 +140,7 @@ public class ImdbParser {
                 .filter(m -> m.getRating() >= 9)
                 .collect(Collectors.toList());
 
-        Knapsack.knapsack(movies, 60_000, 10, new Knapsacker<Movie>() {
+        Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
             @Override
             public int getWeight(Movie movie) {
                 return movie.getDuration();

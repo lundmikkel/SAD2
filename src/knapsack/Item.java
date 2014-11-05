@@ -1,8 +1,9 @@
 package knapsack;
 
-public class Item implements Knapsackable{
-    public final int weight, value;
-    public final String name;
+public class Item{
+    private final int weight;
+    private final int value;
+    private final String name;
 
     public Item(String name, int weight, int value)
     {
@@ -13,16 +14,18 @@ public class Item implements Knapsackable{
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
-    @Override
     public int getWeight() {
         return weight;
     }
 
-    @Override
-    public double getValue() {
+    public int getValue() {
         return value;
+    }
+
+    public String getName() {
+        return name;
     }
 }

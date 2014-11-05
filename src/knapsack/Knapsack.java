@@ -23,7 +23,7 @@ public class Knapsack {
             System.out.println(i + " : w: " + i.getWeight() + " v: " + i.getValue());
         System.out.println();
 
-        Set<Item> result = knapsack(items, W, 0.1, new Knapsacker<Item>() {
+        Set<Item> result = knapsack(items, W, 0.1, new KnapsackHelper<Item>() {
             @Override
             public int getWeight(Item item) {
                 return item.getWeight();
@@ -40,7 +40,7 @@ public class Knapsack {
         System.out.println();
     }
 
-    public static <T> Set<T> knapsack(List<T> items, int W, double scalingFactor, Knapsacker<T> knapsacker) {
+    public static <T> Set<T> knapsack(List<T> items, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
         //int maxWeight = items.stream().mapToInt(i -> i.getWeight()).max().getAsInt();
         //double scalingFactor = precision * maxWeight / items.size();
         W = (int)Math.floor(W/scalingFactor);
@@ -51,10 +51,10 @@ public class Knapsack {
         for (int item = 1, size = items.size(); item <= size; ++item) {
             for (int w = 0; w <= W; ++w) {
                 T i = items.get(item - 1);
-                int wi = (int) Math.ceil(knapsacker.getWeight(i)/scalingFactor);
+                int wi = (int) Math.ceil(knapsackHelper.getWeight(i)/scalingFactor);
                 if (wi <= w) {
                     double notSelected = cache[item - 1][w];
-                    double selected = knapsacker.getValue(i) + cache[item - 1][w - wi];
+                    double selected = knapsackHelper.getValue(i) + cache[item - 1][w - wi];
                     cache[item][w] = Math.max(notSelected, selected);
                 }
             }
@@ -74,10 +74,10 @@ public class Knapsack {
 
         Set<T> result = new HashSet<>();
         for (int item = items.size(), w = W; 0 < item; --item) {
-            int wi = (int) Math.ceil(knapsacker.getWeight(items.get(item - 1)) / scalingFactor);
+            int wi = (int) Math.ceil(knapsackHelper.getWeight(items.get(item - 1)) / scalingFactor);
             if (wi <= w) {
                 double actual = cache[item - 1][w - wi];
-                double expected = cache[item][w] - knapsacker.getValue(items.get(item - 1));
+                double expected = cache[item][w] - knapsackHelper.getValue(items.get(item - 1));
                 if (actual == expected) {
                     w -= wi;
                     result.add(items.get(item - 1));
