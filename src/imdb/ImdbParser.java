@@ -132,7 +132,7 @@ public class ImdbParser {
 
     public static void main(String[] args) {
         Parse("dataset/imdb-r.txt");
-        for (Movie m : Knapsack.knapsack(Movie.getAll().stream().filter(mi -> mi.getValue() > 0).collect(Collectors.toList()), 500))
+        for (Movie m : Knapsack.knapsack(Movie.getAll().stream().filter(mi -> mi.getValue() > 0).collect(Collectors.toList()), 50000, 507))
             System.out.println(m.getTitle()+": "+m.getDuration()+" min - Rating: "+m.getRating());
     }
 
