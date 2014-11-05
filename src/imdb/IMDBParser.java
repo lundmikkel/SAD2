@@ -1,11 +1,14 @@
 package imdb;
 
+import knapsack.Knapsack;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * To change this template, choose Tools | Templates
@@ -128,7 +131,9 @@ public class ImdbParser {
     }
 
     public static void main(String[] args) {
-        Parse("SAD2git/dataset/imdb-r.txt");
+        Parse("dataset/imdb-r.txt");
+        for (Movie m : Knapsack.knapsack(Movie.getAll().stream().filter(mi -> mi.getValue() > 0).collect(Collectors.toList()), 500))
+            System.out.println(m.getTitle()+": "+m.getDuration()+" min - Rating: "+m.getRating());
     }
 
     private static String[] ParseLine(String line) {
