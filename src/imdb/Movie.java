@@ -1,8 +1,10 @@
 package imdb;
 
+import knapsack.Knapsackable;
+
 import java.util.*;
 
-public class Movie {
+public class Movie implements Knapsackable {
     private final static Map<Integer, Movie> instances = new HashMap<>();
 
     // region Fields
@@ -11,7 +13,7 @@ public class Movie {
     private final String title;
     private final int year;
     // Negative values mean undefined
-    private final float rating;
+    private final double rating;
     private final int duration;
     private final Set<Director> directors = new HashSet<>();
     private final Set<String> genres = new HashSet<>();
@@ -56,7 +58,7 @@ public class Movie {
         return year;
     }
 
-    public float getRating() {
+    public double getRating() {
         return rating;
     }
 
@@ -123,6 +125,16 @@ public class Movie {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Override
+    public int getWeight() {
+        return getDuration();
+    }
+
+    @Override
+    public double getValue() {
+        return getRating();
     }
 
     // endregion
