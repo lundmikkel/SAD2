@@ -122,6 +122,12 @@ public class Movie implements Knapsackable {
 
     // region Overrides
 
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "%s (%d) - %d mins [%.2f]", title, year, duration, rating);
+    }
+
     @Override
     public int hashCode() {
         return id;
