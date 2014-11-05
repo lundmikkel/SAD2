@@ -37,7 +37,7 @@ public class Knapsack {
     public static Set<Knapsackable> knapsack(List<? extends Knapsackable> items, int W)
     {
         System.out.println("Allocating of size: " + ((W+1) * (items.size()+1)));
-        int[][] cache = new int[items.size()+1][W+1];
+        double[][] cache = new double[items.size()+1][W+1];
         System.out.println("Array allocated of size: " + ((W+1) * (items.size()+1)));
         for (int item = 1; item <= items.size(); item++){
             for (int w = 0; w <= W; w++)

@@ -24,7 +24,7 @@ public class Item implements Knapsackable{
     }
 
     @Override
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 }
