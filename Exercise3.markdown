@@ -1,12 +1,11 @@
-Exercise 3
-============
+Actor Rank
+----------
 
 
 **1. Design and analyse a MapReduce algorithm that transforms this set of pairs into another set of pairs that is more suitable for computing ActorRank.**
 
 The input consists in a set of pairs `(movie id; author list)` where movie id is the identifier of a movie, and author list contains the identifiers of all actors that played in the movie
 	
-	//M assumed to be |V|
 	//Emit adjacency lists(edges) for all authors
 	Map(movie_id, author_list)
 		for each author x in author_list
@@ -33,3 +32,26 @@ The input consists in a set of pairs `(movie id; author list)` where movie id is
 	Reduce(<author u, authors[<v1, ARv1>, <v2, ARv2>, ... ,<vn, ARvn>])
 		for each author v, rank ARv in authors
 			emit(u, <v, ar>)
+
+Actor Triplets
+----------
+
+**IMDb would like to find all groups of three actors that have played in at least one movie.**
+Design and analyse a MapReduce algorithm that find all triplets of actors that have played together at least once. The input consists in a set of pairs `(movie id; author list)` where movie id is the identifier of a movie, and author list contains the identifiers of all actors that played in the movie. The required output is a set of pairs `(< actor1, actor2, actor3 >; $)` containing all triplets of actors that played togetehr in at least one movie; an actor
+triplet must appear exactrly once.
+
+
+Assumption: Authors can be compared (v<u) firstly by degree, and secondly by some other measure for tie breaking (unique id?)
+
+___
+* Round 1 
+
+		Map(movie id, author list)	
+			for each author u in author list
+				for each author v in author list
+					if v > u then emit(<u, $>; v) //u is responsible for the triangle
+					else emit(<v, $>; u)          //v is responsible for the triangle
+					emit(<u,v>, $)                //propagate the input graph to the next round
+
+		Reduce(author a, author b)
+//Look on slide 41.
