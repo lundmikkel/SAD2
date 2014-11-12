@@ -44,38 +44,38 @@ Assumption: Authors can be compared (v<u) firstly by degree, and secondly by som
 
 ___
 
-* Round 1 
+**Round 1**
 
-		Map(movie id, author list)	
-			for each author u in author list
-				for each author v in author list
-					if v > u then emit(<u, $>; v) //u is responsible for the triangle
-					else emit(<v, $>; u)          //v is responsible for the triangle
-					emit(<u,v>, $)                //propagate the input graph to the next round
-
-		Reduce(pair <author u, author v>; authors[u1, u2, ..., un])
-		    If(v != $) emit(<u,v>; $) and return; //propagate the input graph to the next round
-		    
-		    for each author x in authors
-		        for each author y in authors
-		            if (x < y) emit((x,y); u) //path x-u-y
-
-* Round 2
-
-        Map(edge <author u, author v>; author x)
-            emit(<u,v>;x) //Just propagate the pairs
+    Map(movie id, author list)	
+    	for each author u in author list
+    		for each author v in author list
+    			if v > u then emit(<u, $>; v) //u is responsible for the triangle
+    			else emit(<v, $>; u)          //v is responsible for the triangle
+    			emit(<u,v>, $)                //propagate the input graph to the next round
+    
+    Reduce(pair <author u, author v>; authors[u1, u2, ..., un])
+        If(v != $) emit(<u,v>; $) and return; //propagate the input graph to the next round
         
-        Reduce(edge <author u, author v>; authors[x1, x2, ..., xn])
-            if($ in authors) //Meaning there is a connection between author u and v (propagated from previous Reduce round)
-                emit($, |authors|-1)
+        for each author x in authors
+            for each author y in authors
+                if (x < y) emit((x,y); u) //path x-u-y
 
-* Round 3
+**Round 2**
 
-        Map($, count c)
-            emit($, c) // Just propagate (sum in reduce)
-        
-        Reduce($, counts[c1, c2, ..., cn])
-            sum = 0
-            for each c in counts
-                sum += c
-            emit($, sum) //Total number of triangles
+    Map(edge <author u, author v>; author x)
+        emit(<u,v>;x) //Just propagate the pairs
+    
+    Reduce(edge <author u, author v>; authors[x1, x2, ..., xn])
+        if($ in authors) //Meaning there is a connection between author u and v (propagated from previous Reduce round)
+            emit($, |authors|-1)
+
+**Round 3**
+
+    Map($, count c)
+        emit($, c) // Just propagate (sum in reduce)
+    
+    Reduce($, counts[c1, c2, ..., cn])
+        sum = 0
+        for each c in counts
+            sum += c
+        emit($, sum) //Total number of triangles
