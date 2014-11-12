@@ -43,6 +43,7 @@ triplet must appear exactrly once.
 Assumption: Authors can be compared (v<u) firstly by degree, and secondly by some other measure for tie breaking (unique id?)
 
 ___
+
 * Round 1 
 
 		Map(movie id, author list)	
@@ -52,5 +53,29 @@ ___
 					else emit(<v, $>; u)          //v is responsible for the triangle
 					emit(<u,v>, $)                //propagate the input graph to the next round
 
-		Reduce(author a, author b)
-//Look on slide 41.
+		Reduce(pair <author u, author v>; authors[u1, u2, ..., un])
+		    If(v != $) emit(<u,v>; $) and return; //propagate the input graph to the next round
+		    
+		    for each author x in authors
+		        for each author y in authors
+		            if (x < y) emit((x,y); u) //path x-u-y
+
+* Round 2
+
+        Map(edge <author u, author v>; author x)
+            emit(<u,v>;x) //Just propagate the pairs
+        
+        Reduce(edge <author u, author v>; authors[x1, x2, ..., xn])
+            if($ in authors) //Meaning there is a connection between author u and v (propagated from previous Reduce round)
+                emit($, |authors|-1)
+
+* Round 3
+
+        Map($, count c)
+            emit($, c) // Just propagate (sum in reduce)
+        
+        Reduce($, counts[c1, c2, ..., cn])
+            sum = 0
+            for each c in counts
+                sum += c
+            emit($, sum) //Total number of triangles
