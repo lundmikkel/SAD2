@@ -37,7 +37,7 @@ Actor Triplets
 
 **IMDb would like to find all groups of three actors that have played in at least one movie.**
 Design and analyse a MapReduce algorithm that find all triplets of actors that have played together at least once. The input consists in a set of pairs `(movie id; author list)` where movie id is the identifier of a movie, and author list contains the identifiers of all actors that played in the movie. The required output is a set of pairs `(< actor1, actor2, actor3 >; $)` containing all triplets of actors that played togetehr in at least one movie; an actor
-triplet must appear exactrly once.
+triplet must appear exactly once.
 
 
 Assumption: Authors can be compared (v<u) firstly by degree, and secondly by some other measure for tie breaking (unique id?)
@@ -46,15 +46,15 @@ ___
 
 **Round 1**
 
-    Map(movie id, author list)	
+    Map(movie id, author list)
     	for each author u in author list
     		for each author v in author list
-    			if v > u then emit(<u, $>; v) //u is responsible for the triangle
+    			if u < v then emit(<u, $>; v) //u is responsible for the triangle
     			else emit(<v, $>; u)          //v is responsible for the triangle
     			emit(<u,v>, $)                //propagate the input graph to the next round
     
     Reduce(pair <author u, author v>; authors[u1, u2, ..., un])
-        If(v != $) emit(<u,v>; $) and return; //propagate the input graph to the next round
+        if(v != $) emit(<u,v>; $) and return; //propagate the input graph to the next round
         
         for each author x in authors
             for each author y in authors
@@ -66,16 +66,7 @@ ___
         emit(<u,v>;x) //Just propagate the pairs
     
     Reduce(edge <author u, author v>; authors[x1, x2, ..., xn])
-        if($ in authors) //Meaning there is a connection between author u and v (propagated from previous Reduce round)
-            emit($, |authors|-1)
-
-**Round 3**
-
-    Map($, count c)
-        emit($, c) // Just propagate (sum in reduce)
-    
-    Reduce($, counts[c1, c2, ..., cn])
-        sum = 0
-        for each c in counts
-            sum += c
-        emit($, sum) //Total number of triangles
+        if($ in authors) //Meaning there is a connection between author u and v
+            for each author x in authors
+                if (x != $)                
+                    emit(<u, v, x>, $)
