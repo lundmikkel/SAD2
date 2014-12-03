@@ -1,7 +1,5 @@
 package imdb;
 
-import knapsack.Knapsackable;
-
 import java.util.*;
 
 public class Movie {
