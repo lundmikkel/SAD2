@@ -7,86 +7,102 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Rasmus on 04-12-2014.
+ * An executor that will execute a series of mapper/reducer pairs in parallel.
+ * @param <InKey> The input keys' type
+ * @param <InValue> The input values' type
+ * @param <OutKey> The output keys' type
+ * @param <OutValue> The output values' type
  */
 public class Executor<InKey, InValue, OutKey, OutValue> {
 
-    List<Tuple<Mapper, Reducer>> rounds = new ArrayList<Tuple<Mapper, Reducer>>();
+    List<Tuple<Mapper, Reducer>> rounds = new ArrayList<>();
     List<Tuple<InKey, InValue>> input;
 
+    /**
+     * Construct an executor
+     * @param input List of tuples that is given to the first mapper
+     */
     public Executor(List<Tuple<InKey, InValue>> input){
         this.input = input;
     }
 
+    /**
+     * Add a mapper and reducer pair to the executor.
+     * Mappers and reducers will be executed in the order they were added,
+     * and must accept the previous output in the chain as input.
+     * @param mapper A mapper
+     * @param reducer A reducer
+     * @return The executor to allow chaining
+     */
     public Executor add(Mapper mapper, Reducer reducer){
-        rounds.add(new Tuple<Mapper, Reducer>(mapper, reducer));
+        rounds.add(new Tuple<>(mapper, reducer));
+
         return this;
     }
+
+    /**
+     * Adds the mapper and reducer pair multiple times.
+     * @param mapper A mapper
+     * @param reducer A reducer
+     * @return The executor to allow chaining
+     */
     public Executor add(Mapper mapper, Reducer reducer, int repetitions){
-        for (;repetitions >= 0; --repetitions)
-            add(mapper,reducer);
+        for (/* */; repetitions >= 0; --repetitions)
+            add(mapper, reducer);
+
         return this;
     }
 
+    /**
+     * Execute all the given mapper/reducer pairs in given order and return the output from the last reducer.
+     * @return Output from last reducer
+     * @throws Exception
+     */
     public List<Tuple<OutKey, OutValue>> execute() throws Exception{
-        //List<Tuple<Object, Object>> data = (List<Tuple<Object, Object>>) input;
+        // Preprocess input
+        List<Tuple<?,?>> data = new ArrayList<>(input.size());
+        data.addAll(input);
 
-        List<Tuple<Object, Object>> data = new ArrayList<Tuple<Object, Object>>();
-        for (Tuple<InKey, InValue> in : input)
-            data.add((Tuple<Object, Object>)in);
-
+        // Execute all rounds
         for (Tuple<Mapper, Reducer> round : rounds){
             final Mapper mapper = round.key;
             final Reducer reducer = round.value;
 
-            //////////////////////////////////////////////////
-            //Spawn mappers
+            // Spawn mappers
             ExecutorService mappersExecutor = Executors.newWorkStealingPool();
             final MapCollector mapCollector = new MapCollector();
 
-            for (Tuple<Object, Object> dataItem : data){
-                final Tuple<Object, Object> d = dataItem;
-                mappersExecutor.execute(()->{
-                    try {
-                        mapper.map(d.key, d.value, mapCollector);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            for (Tuple<?, ?> dataItem : data){
+                final Tuple<?, ?> d = dataItem;
+                mappersExecutor.execute(() -> mapper.map(d.key, d.value, mapCollector));
             }
 
-            //Synchronize
+            // Synchronize
             mappersExecutor.shutdown();
             mappersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
 
-
-            //////////////////////////////////////////////////
-            //Spawn reducers
+            // Spawn reducers
             ExecutorService reducersExecutor = Executors.newWorkStealingPool();
             final ReduceCollector reduceCollector = new ReduceCollector();
 
             for (Object key : mapCollector.map.keySet()){
                 final Object k = key;
                 final Iterable vs = (Iterable)mapCollector.map.get(key);
-                reducersExecutor.execute(() -> {
-                    try {
-                        reducer.reduce(k, vs, reduceCollector);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                reducersExecutor.execute(() -> reducer.reduce(k, vs, reduceCollector));
             }
 
-            //Synchronize
+            // Synchronize
             reducersExecutor.shutdown();
             reducersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
 
-            //Collect reducers result
+
+            // Collect reducers result
             data = reduceCollector.list;
         }
 
+        // Preprocess output
         List<Tuple<OutKey, OutValue>> result = new ArrayList<>();
-        for (Tuple<Object, Object> d : data)
+        for (Tuple<?, ?> d : data)
             result.add((Tuple<OutKey, OutValue>) d);
 
         return result;

@@ -1,10 +1,7 @@
-package example;
+package WordCount;
 
 import engine.*;
 
-/**
- * Created by Rasmus on 04-12-2014.
- */
 public class WordCountReducer implements Reducer<String, Integer, String, Integer> {
     @Override
     public void reduce(String s, Iterable<Integer> values, Collector<String, Integer> collector) {
