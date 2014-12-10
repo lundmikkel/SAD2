@@ -1,13 +1,20 @@
 package engine;
 
 public class Triple<T1, T2, T3> {
-    public final T1 item1;
-    public final T2 item2;
-    public final T3 item3;
+    public T1 item1;
+    public T2 item2;
+    public T3 item3;
     public Triple(T1 a, T2 b, T3 c){
         item1 = a;
         item2 = b;
         item3 = c;
+    }
+
+    public Triple update(T1 a, T2 b, T3 c){
+        item1 = a;
+        item2 = b;
+        item3 = c;
+        return this;
     }
 
     @Override

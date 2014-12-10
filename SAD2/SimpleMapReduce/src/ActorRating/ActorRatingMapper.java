@@ -23,7 +23,7 @@ public class ActorRatingMapper implements Mapper<Integer, Iterable<Triple<Float,
         }
         Float actorRatingA = alpha / actorCount + (1 - alpha) * (sum / count);
         for (Triple<Float, Integer, Float> connection : connections) {
-            collector.collect(connection.item2, new Triple<>(connection.item1, actorA, actorRatingA));
+            collector.collect(connection.item2, connection.update(connection.item1, actorA, actorRatingA));
         }
     }
 }
