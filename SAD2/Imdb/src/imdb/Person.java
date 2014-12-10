@@ -46,7 +46,7 @@ public abstract class Person {
 
     @Override
     public int hashCode() {
-        return id * 31;
+        return id * 59;
     }
 
     @Override

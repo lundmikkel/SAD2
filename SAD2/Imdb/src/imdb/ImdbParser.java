@@ -222,19 +222,19 @@ public class ImdbParser {
     }
 
     public static void main(String[] args) {
-        Parse("dataset/imdb-r.txt");
+        Parse("data/imdb-r.txt");
         List<Movie> movies = Movie.getAll().stream()
                 .filter(m -> m.getRating() >= 9)
                 .collect(Collectors.toList());
 
-        System.out.println("Movies:\t"+Movie.getAll().size());
-        System.out.println("Actors:\t"+Actor.getAll().size());
+        System.out.println("Movies:\t"+Movie.count());
+        System.out.println("Actors:\t"+Actor.count());
         System.out.println("Directors:\t"+Director.getAll().size());
         System.out.println("Max Movie id:\t"+Movie.getAll().stream().max((x1, x2) -> (int)Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Max Actor id:\t"+Actor.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Max Director id:\t"+Director.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Movies with rating and actors:\t"+Movie.getAll().stream().filter(m -> m.getRating()>0 && m.getRoles().size() > 0).count());
-        OutputMovies("MRMovies");
+        OutputMovies("data/MRMovies");
 
         System.out.println("DONE");
 
