@@ -60,5 +60,10 @@ public abstract class Person {
         return this.getId() == that.getId();
     }
 
+    @Override
+    public String toString() {
+        return getFirstName()+" "+getLastName()+" ("+getId()+")";
+    }
+
     // endregion
 }
