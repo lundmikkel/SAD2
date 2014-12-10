@@ -15,7 +15,6 @@ public class GraphBuildMapper implements Mapper<String, String, Integer, Tuple<F
         StringTokenizer tokenizer = new StringTokenizer(fileContent, "\r\n");
         while (tokenizer.hasMoreTokens()) {
             String line = tokenizer.nextToken();
-            System.out.println("Reading line: " + line);
             StringTokenizer lineTokenizer = new StringTokenizer(line, ",");
             float movieRating = Float.parseFloat(lineTokenizer.nextToken()) / 10;
             //Parse all actors

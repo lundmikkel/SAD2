@@ -234,12 +234,13 @@ public class ImdbParser {
         System.out.println("Max Actor id:\t"+Actor.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Max Director id:\t"+Director.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Movies with rating and actors:\t"+Movie.getAll().stream().filter(m -> m.getRating()>0 && m.getRoles().size() > 0).count());
-        OutputMovies("data/MRMovies");
+        OutputMovies("data/ActorRating/");
 
         System.out.println("DONE");
 
 
         if (true) return;
+
         Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
             @Override
             public int getWeight(Movie movie) {

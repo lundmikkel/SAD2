@@ -4,30 +4,44 @@ import WordCount.FileLoaderMapper;
 import engine.Executor;
 import engine.ReduceSkipper;
 import engine.Tuple;
+import imdb.Actor;
+import imdb.ImdbParser;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         List<Tuple<String, String>> files = new ArrayList<>();
-        scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s, "")));
+        scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
+
+
+        ImdbParser.Parse("data/imdb-r.txt");
+        float alpha = 0.1f;
+        int actorCount = 460018;
 
         List<Tuple<Integer, Float>> result = new Executor(files)
                 .add(new FileLoaderMapper(), new ReduceSkipper())
                 .add(new GraphBuildMapper(), new GraphBuildReducer())
                 .add(new TransformMapper(), new ReduceSkipper(false))
-                .add(new ActorRatingMapper(), new ReduceSkipper(false), 10)
+                .add(new ActorRatingMapper(alpha, actorCount), new ReduceSkipper(false), 5)
                 .add(new ActorRatingOutputMapper(), new ActorRatingOutputReducer()).execute();
 
-        Collections.sort(result, (a1, a2) -> (int) Math.signum(a1.value - a2.value));
-        result.forEach(System.out::println);
+        Collections.sort(result, (a1, a2) -> (int)Math.signum(a2.value - a1.value));
+        PrintWriter pw = new PrintWriter(new File("data/MRoutput.txt"));
+        result.forEach(pw::println);
+        pw.flush();
+        pw.close();
+
+        result.stream().limit(100).forEach(a -> System.out.println(Actor.get(a.key)+": "+a.value));
     }
 
-    private static List<String> scanDir(String dir) {
+    private static List<String> scanDir(String dir){
         File folder = new File(dir);
         File[] listOfFiles = folder.listFiles();
         List<String> result = new ArrayList<>();
