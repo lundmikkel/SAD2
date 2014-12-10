@@ -5,7 +5,7 @@ import engine.Mapper;
 import engine.Triple;
 
 public class ActorRatingMapper implements Mapper<Integer, Iterable<Triple<Float, Integer, Float>>, Integer, Triple<Float, Integer, Float>> {
-    final float alpha = 0.5f;
+    final float alpha = 0.1f;
     final int numActors = 3;
 
     @Override
