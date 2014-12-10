@@ -4,7 +4,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapCollector<Key, Value> implements Collector<Key, Value>{
-    public final ConcurrentHashMap<Key, Vector<Value>> map = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<Key, Vector<Value>> map = new ConcurrentHashMap<>();
 
     public void collect(Key k, Value v){
         map.putIfAbsent(k, new Vector<>());

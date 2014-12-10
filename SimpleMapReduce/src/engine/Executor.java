@@ -47,7 +47,7 @@ public class Executor<InKey, InValue, OutKey, OutValue> {
      * @return The executor to allow chaining
      */
     public Executor add(Mapper mapper, Reducer reducer, int repetitions){
-        for (/* */; repetitions >= 0; --repetitions)
+        for (/* */; repetitions > 0; --repetitions)
             add(mapper, reducer);
 
         return this;
@@ -58,33 +58,44 @@ public class Executor<InKey, InValue, OutKey, OutValue> {
      * @return Output from last reducer
      * @throws Exception
      */
-    public List<Tuple<OutKey, OutValue>> execute() throws Exception{
+    public List<Tuple<OutKey, OutValue>> execute(){
         // Preprocess input
         List<Tuple<?,?>> data = new ArrayList<>(input.size());
         data.addAll(input);
 
         // Execute all rounds
+        int roundCount = 0;
         for (Tuple<Mapper, Reducer> round : rounds){
             final Mapper mapper = round.key;
             final Reducer reducer = round.value;
-
+            System.out.println("---------------------------------------------");
+            System.out.println("Starting round " + (++roundCount));
+            System.out.println("Mapper: " + mapper.getClass().getName());
+            System.out.println("Reducer: " + reducer.getClass().getName());
             // Spawn mappers
             ExecutorService mappersExecutor = Executors.newWorkStealingPool();
             final MapCollector mapCollector = new MapCollector();
 
+            System.out.println("Starting " + data.size() + " mappers");
             for (Tuple<?, ?> dataItem : data){
                 final Tuple<?, ?> d = dataItem;
                 mappersExecutor.execute(() -> mapper.map(d.key, d.value, mapCollector));
             }
 
+
             // Synchronize
             mappersExecutor.shutdown();
-            mappersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
+            try {
+                mappersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
             // Spawn reducers
             ExecutorService reducersExecutor = Executors.newWorkStealingPool();
             final ReduceCollector reduceCollector = new ReduceCollector();
 
+            System.out.println("Starting " + mapCollector.map.keySet().size() + " collectors");
             for (Object key : mapCollector.map.keySet()){
                 final Object k = key;
                 final Iterable vs = (Iterable)mapCollector.map.get(key);
@@ -93,10 +104,14 @@ public class Executor<InKey, InValue, OutKey, OutValue> {
 
             // Synchronize
             reducersExecutor.shutdown();
-            reducersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
+            try {
+                reducersExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS.NANOSECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
 
-            // Collect reducers result
+            // Collect reducers result for next round
             data = reduceCollector.list;
         }
 
