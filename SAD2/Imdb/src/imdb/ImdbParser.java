@@ -3,14 +3,8 @@ package imdb;
 import knapsack.Knapsack;
 import knapsack.KnapsackHelper;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -131,36 +125,7 @@ public class ImdbParser {
         System.out.println("Directors: Found: " + df + " -  Not found: " + dnf);
         System.out.println("Actors: Found: " + af + " -  Not found: " + anf);
         System.out.println("Movies: Found: " + mf + " -  Not found: " + mnf);
-    }
 
-    public static void main(String[] args) {
-        Parse("data/imdb-r.txt");
-        List<Movie> movies = Movie.getAll().stream()
-                .filter(m -> m.getRating() >= 9)
-                .collect(Collectors.toList());
-
-        Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
-            @Override
-            public int getWeight(Movie movie) {
-                return movie.getDuration();
-            }
-
-            @Override
-            public double getValue(Movie movie) {
-                return movie.getRating();
-            }
-        }).forEach(System.out::println);
-
-        final AtomicInteger W = new AtomicInteger(60_000);
-        Set<Movie> solution = new HashSet<>();
-        movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
-        movies.forEach(m -> {
-            if (m.getDuration() <= W.get()) {
-                solution.add(m);
-                W.addAndGet(-m.getDuration());
-            }
-        });
-        movies.forEach(System.out::println);
     }
 
     private static String[] ParseLine(String line) {
@@ -205,5 +170,97 @@ public class ImdbParser {
          }
          System.out.println();*/
         return result.toArray(new String[result.size()]);
+    }
+
+    private static void OutputMovies(String outputFolder) {
+        File o = new File(outputFolder);
+        deleteDir(o);
+        o.mkdir();
+
+        int moviesPerFile = 100;
+        int tempbreak = 10;
+
+        Iterator<Movie> mIt = Movie.getAll().iterator();
+        int numFiles = 0;
+        while(mIt.hasNext()) {
+            String filename = numFiles++ + "";
+            try {
+                PrintWriter w = new PrintWriter(outputFolder + "/" +filename, "UTF-8");
+                int i = 0;
+                while(mIt.hasNext() && i++ < moviesPerFile) {
+                    Movie m = mIt.next();
+                    if(m.getRating()<0 || m.getRoles().size() < 1) {
+                        --i;
+                        continue;
+                    }
+                    w.print(m.getRating());
+                    for (Role r : m.getRoles()) {
+                        w.print(","+r.getActor().getId());
+                    }
+                    w.println();
+                }
+                w.close();
+            } catch (IOException e) {
+                System.err.println("Unable to write to file: '" + filename + "': ");
+                e.printStackTrace();
+            }
+            //if (--tempbreak < 1) break;
+        }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
+
+    public static void main(String[] args) {
+        Parse("dataset/imdb-r.txt");
+        List<Movie> movies = Movie.getAll().stream()
+                .filter(m -> m.getRating() >= 9)
+                .collect(Collectors.toList());
+
+        System.out.println("Movies:\t"+Movie.getAll().size());
+        System.out.println("Actors:\t"+Actor.getAll().size());
+        System.out.println("Directors:\t"+Director.getAll().size());
+        System.out.println("Max Movie id:\t"+Movie.getAll().stream().max((x1, x2) -> (int)Math.signum(x1.getId() - x2.getId())).get().getId());
+        System.out.println("Max Actor id:\t"+Actor.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
+        System.out.println("Max Director id:\t"+Director.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
+        System.out.println("Movies with rating and actors:\t"+Movie.getAll().stream().filter(m -> m.getRating()>0 && m.getRoles().size() > 0).count());
+        OutputMovies("MRMovies");
+
+        System.out.println("DONE");
+
+
+        if (true) return;
+        Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
+            @Override
+            public int getWeight(Movie movie) {
+                return movie.getDuration();
+            }
+
+            @Override
+            public double getValue(Movie movie) {
+                return movie.getRating();
+            }
+        }).forEach(System.out::println);
+
+        final AtomicInteger W = new AtomicInteger(60_000);
+        Set<Movie> solution = new HashSet<>();
+        movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
+        movies.forEach(m -> {
+            if (m.getDuration() <= W.get()) {
+                solution.add(m);
+                W.addAndGet(-m.getDuration());
+            }
+        });
+        movies.forEach(System.out::println);
     }
 }
