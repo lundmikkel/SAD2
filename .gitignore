@@ -6,7 +6,8 @@
 /*.iml
 
 ## Directory-based project format:
-#.idea/
+.idea/
+SAD2/.idea/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
