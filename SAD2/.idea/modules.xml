@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Imdb/Imdb.iml" filepath="$PROJECT_DIR$/Imdb/Imdb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SAD2.iml" filepath="$PROJECT_DIR$/SAD2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SimpleMapReduce/SimpleMapReduce.iml" filepath="$PROJECT_DIR$/SimpleMapReduce/SimpleMapReduce.iml" />
+    </modules>
+  </component>
+</project>
