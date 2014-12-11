@@ -17,13 +17,27 @@ public class Knapsack {
         items.add(new Item(" 9", 2, 4));
         items.add(new Item("10", 2, 3));
 
-        int W = 9;
+        //int[][] items = new int[][]{
+        //    new int[]{ 1, 2}, //  1
+        //    new int[]{ 1, 2}, //  2
+        //    new int[]{ 2, 4}, //  3
+        //    new int[]{ 1, 2}, //  4
+        //    new int[]{ 1, 2}, //  5
+        //    new int[]{ 2, 4}, //  6
+        //    new int[]{ 1, 2}, //  7
+        //    new int[]{ 1, 2}, //  8
+        //    new int[]{ 2, 4}, //  9
+        //    new int[]{ 2, 3}, // 10
+        //};
+
+        int K = 5;
+        int W = 20;
         System.out.println("Input: W = " + W);
         for (Item i : items)
             System.out.println(i + " : w: " + i.getWeight() + " v: " + i.getValue());
         System.out.println();
 
-        Set<Item> result = knapsack(items, W, 0.1, new KnapsackHelper<Item>() {
+        Set<Item> result = knapsack(items, K, W, 1, new KnapsackHelper<Item>() {
             @Override
             public int getWeight(Item item) {
                 return item.getWeight();
@@ -40,47 +54,70 @@ public class Knapsack {
         System.out.println();
     }
 
-    public static <T> Set<T> knapsack(List<T> items, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
+    public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
+        T[] items = (T[]) itemsList.toArray();
+        int N = items.length;
+        int[] weights = new int[N];
+        for (int i = 0; i < N; ++i)
+            weights[i] = (int) Math.ceil(knapsackHelper.getWeight(items[i]) / scalingFactor);
+        double[] values = new double[N];
+        for (int i = 0; i < N; ++i)
+            values[i] = knapsackHelper.getValue(items[i]);
+
         //int maxWeight = items.stream().mapToInt(i -> i.getWeight()).max().getAsInt();
         //double scalingFactor = precision * maxWeight / items.size();
-        W = (int)Math.floor(W/scalingFactor);
+        W = (int) Math.floor(W / scalingFactor);
 
-        System.out.printf(Locale.US, "Allocating of size: %,d Byte\n", 4 * (W + 1) * (items.size() + 1));
+        System.out.printf(Locale.US, "Allocating of size: %,d Byte\n", 8 * (N + 1) * (W + 1) * (K + 1));
 
-        double[][] cache = new double[items.size() + 1][W + 1];
-        for (int item = 1, size = items.size(); item <= size; ++item) {
-            for (int w = 0; w <= W; ++w) {
-                T i = items.get(item - 1);
-                int wi = (int) Math.ceil(knapsackHelper.getWeight(i)/scalingFactor);
-                if (wi <= w) {
-                    double notSelected = cache[item - 1][w];
-                    double selected = knapsackHelper.getValue(i) + cache[item - 1][w - wi];
-                    cache[item][w] = Math.max(notSelected, selected);
+        double[][][] cache = new double[K + 1][N + 1][W + 1];
+
+        // Iterate each layer
+        // k is the current number of items needed picked
+        for (int k = 1; k <= K; ++k) {
+
+            // Iterate all items
+            for (int i = 1; i <= N; ++i) {
+
+                for (int w = 0; w <= W; ++w) {
+                    int wi = weights[i - 1];
+
+                    if (wi <= w) {
+                        double notSelected = cache[k][i - 1][w];
+                        double selected = cache[k - 1][i - 1][w - wi] + values[i - 1];
+
+                        cache[k][i][w] = Math.max(notSelected, selected);
+                    }
                 }
             }
         }
 
-        //for (int item = 0; item <= items.size(); item++)
-        //{
-        //if (item == 0) {
-        //System.out.println("Item w: - v: - : " + Arrays.toString(cache[item]));
-        //continue;
-        //}
-        //Knapsackable k = items.get(item-1);
-        //System.out.print("Item w: " + k.getWeight() + " v: " + k.getValue() + " : ");
-        //System.out.println(Arrays.toString(cache[item]));
-        //}
-        //System.out.println();
+        for (int k = 1; k <= K; ++k) {
+            System.out.println("k = " + k);
+            for (int i = 0; i <= N; i++) {
+                if (i == 0) {
+                    System.out.println("Item w: - v: - : " + Arrays.toString(cache[k][i]));
+                    continue;
+                }
+                System.out.print("Item w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
+                System.out.println(Arrays.toString(cache[k][i]));
+            }
+            System.out.println();
+        }
+        System.out.println();
 
         Set<T> result = new HashSet<>();
-        for (int item = items.size(), w = W; 0 < item; --item) {
-            int wi = (int) Math.ceil(knapsackHelper.getWeight(items.get(item - 1)) / scalingFactor);
+        for (int i = N, w = W, k = K; 0 < k; --i) {
+            T item = items[i - 1];
+            int wi = (int) Math.ceil(knapsackHelper.getWeight(item) / scalingFactor);
+
             if (wi <= w) {
-                double actual = cache[item - 1][w - wi];
-                double expected = cache[item][w] - knapsackHelper.getValue(items.get(item - 1));
+                double actual = cache[k - 1][i - 1][w - wi];
+                double expected = cache[k][i][w] - knapsackHelper.getValue(item);
                 if (actual == expected) {
                     w -= wi;
-                    result.add(items.get(item - 1));
+                    --k;
+                    result.add(item);
                 }
             }
         }

@@ -227,6 +227,12 @@ public class ImdbParser {
                 .filter(m -> m.getRating() >= 9)
                 .collect(Collectors.toList());
 
+        //Actor.getAll().stream().sorted((a,b)-> a.getMovieCount() - b.getMovieCount()).forEach(a -> System.out.println(a + " " + a.getMovieCount()));
+
+        //if (true)
+        //    return;
+
+        /*
         System.out.println("Movies:\t"+Movie.count());
         System.out.println("Actors:\t"+Actor.count());
         System.out.println("Directors:\t"+Director.getAll().size());
@@ -240,26 +246,34 @@ public class ImdbParser {
 
 
         if (true) return;
+        */
 
-        Knapsack.knapsack(movies, 60_000, 10, new KnapsackHelper<Movie>() {
+        List<Actor> actors = new ArrayList<>(Actor.getAll());
+
+        int K = 10;
+        int W = 60_000;
+        double sf = 1.0d;
+
+        Knapsack.knapsack(actors, K, W, sf, new KnapsackHelper<Actor>() {
             @Override
-            public int getWeight(Movie movie) {
-                return movie.getDuration();
+            public int getWeight(Actor actor) {
+                return actor.getName().length();
             }
 
             @Override
-            public double getValue(Movie movie) {
-                return movie.getRating();
+            public double getValue(Actor actor) {
+                // TODO: Update to proper rating
+                return actor.getMovieCount();
             }
         }).forEach(System.out::println);
 
-        final AtomicInteger W = new AtomicInteger(60_000);
+        final AtomicInteger W2 = new AtomicInteger(60_000);
         Set<Movie> solution = new HashSet<>();
         movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
         movies.forEach(m -> {
-            if (m.getDuration() <= W.get()) {
+            if (m.getDuration() <= W2.get()) {
                 solution.add(m);
-                W.addAndGet(-m.getDuration());
+                W2.addAndGet(-m.getDuration());
             }
         });
         movies.forEach(System.out::println);

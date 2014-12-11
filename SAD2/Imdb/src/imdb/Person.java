@@ -6,6 +6,7 @@ public abstract class Person {
     private final int id;
     private final String firstName;
     private final String lastName;
+    private final String name;
 
     // endregion
 
@@ -22,6 +23,7 @@ public abstract class Person {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
+        name = firstName + " " + lastName;
     }
 
     // endregion
@@ -38,6 +40,10 @@ public abstract class Person {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public String getName() {
+        return name;
     }
 
     // endregion
@@ -62,7 +68,7 @@ public abstract class Person {
 
     @Override
     public String toString() {
-        return getFirstName()+" "+getLastName()+" ("+getId()+")";
+        return name + " (" + id + ")";
     }
 
     // endregion
