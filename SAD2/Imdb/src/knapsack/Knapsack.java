@@ -31,7 +31,6 @@ public class Knapsack {
         knapsack(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
-        /*
         System.out.println("K = 2, W = 8:");
         knapsack(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
@@ -43,7 +42,6 @@ public class Knapsack {
         System.out.println("K = 3, W = 6:");
         knapsack(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
-        */
     }
 
     public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
@@ -52,7 +50,7 @@ public class Knapsack {
 
         // No possible solution
         if (K > N)
-            return null;
+            return new HashSet<>();
 
         int[] weights = new int[N];
         for (int i = 0; i < N; ++i)
@@ -64,7 +62,7 @@ public class Knapsack {
             for (int wi : weights)
                 w += wi;
 
-            return (w <= W) ? new HashSet<>(itemsList) : null;
+            return (w <= W) ? new HashSet<>(itemsList) : new HashSet<>();
         }
 
         double[] values = new double[N];
@@ -98,7 +96,7 @@ public class Knapsack {
             }
         }
 
-        //*
+        /*
         for (int k = K; k >= 0; --k) {
             System.out.println("k = " + k);
             for (int i = N; i >= 0; --i) {
@@ -117,7 +115,7 @@ public class Knapsack {
         Set<T> result = new HashSet<>();
         for (int i = N, w = W, k = K; 0 < k; --i) {
             // In case there is no solution
-            if (i == 0 && k > 0) return null;
+            if (i == 0 && k > 0) return new HashSet<>();
 
             T item = items[i - 1];
             int wi = (int) Math.ceil(knapsackHelper.getWeight(item) / scalingFactor);
@@ -126,7 +124,7 @@ public class Knapsack {
                 double actual = cache[k - 1][i - 1][w - wi];
                 double expected = cache[k][i][w] - knapsackHelper.getValue(item);
 
-                System.out.println("[" + (k-1) + ", " + (i-1) + ", " + (w-wi) + "]");
+                //System.out.println("[" + (k-1) + ", " + (i-1) + ", " + (w-wi) + "]");
 
                 if (actual == expected) {
                     w -= wi;
