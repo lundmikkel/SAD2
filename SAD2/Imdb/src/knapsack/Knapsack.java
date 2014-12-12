@@ -48,6 +48,54 @@ public class Knapsack {
         System.out.println("\n");
     }
 
+    private static class Cache {
+        Double[][][] cache;
+
+        public Cache(int X, int Y, int Z) {
+            cache = new Double[X][Y][Z];
+        }
+
+        public boolean contains(int x, int y, int z) {
+            return cache[x][y][z] != null;
+        }
+
+        public double set(int x, int y, int z, double value) {
+            return cache[x][y][z] = value;
+        }
+
+        public Double get(int x, int y, int z) {
+            return cache[x][y][z];
+        }
+
+        private class Key {
+            int x, y, z;
+
+            public Key(int x, int y, int z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            @Override
+            public int hashCode() {
+                int hash = 31;
+                hash = hash * 23 + x;
+                hash = hash * 41 + y;
+                hash = hash * 29 + z;
+                return hash;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                Key that = (Key) obj;
+
+                return this.x == that.x &&
+                        this.y == that.y &&
+                        this.z == that.z;
+            }
+        }
+    }
+
     public static <T> Set<T> knapsackRecursive(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
         T[] items = (T[]) itemsList.toArray();
         int N = items.length;
@@ -73,7 +121,7 @@ public class Knapsack {
         for (int i = 0; i < N; ++i)
             values[i] = knapsackHelper.getValue(items[i]);
 
-        Double[][][] cache = new Double[K + 1][N + 1][W + 1];
+        Cache cache = new Cache(K + 1, N + 1, W + 1);
 
         opt(K, N, W, weights, values, cache);
 
@@ -102,8 +150,8 @@ public class Knapsack {
             int wi = weights[i - 1];
 
             if (wi <= w) {
-                Double actual = cache[k - 1][i - 1][w - wi];
-                double expected = cache[k][i][w] - values[i - 1];
+                Double actual = cache.get(k - 1, i - 1, w - wi);
+                double expected = cache.get(k, i, w) - values[i - 1];
 
                 if ((actual == null && expected == 0.0) || (actual != null && actual == expected)) {
                     w -= wi;
@@ -117,10 +165,10 @@ public class Knapsack {
         return result;
     }
 
-    private static <T> double opt(int k, int i, int w, int weights[], double[] values, Double[][][] cache) {
+    private static <T> double opt(int k, int i, int w, int weights[], double[] values, Cache cache) {
         // Returned cached value
-        if (cache[k][i][w] != null)
-            return cache[k][i][w];
+        if (cache.contains(k, i, w))
+            return cache.get(k, i, w);
 
         if (i == 0 || k == 0)
             return 0;
@@ -135,7 +183,7 @@ public class Knapsack {
         double selected = opt(k - 1, i - 1, w - wi, weights, values, cache) + values[i - 1];
 
         // Cache and return value
-        return cache[k][i][w] = Math.max(notSelected, selected);
+        return cache.set(k, i, w, Math.max(notSelected, selected));
     }
 
     public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
