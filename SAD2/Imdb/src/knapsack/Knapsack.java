@@ -28,20 +28,114 @@ public class Knapsack {
         System.out.println();
 
         System.out.println("K = 3, W = 8:");
-        knapsack(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        //knapsack(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        knapsackRecursive(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
         System.out.println("K = 2, W = 8:");
-        knapsack(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        //knapsack(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        knapsackRecursive(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
         System.out.println("K = 2, W = 6:");
-        knapsack(items, 2, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        //knapsack(items, 2, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        knapsackRecursive(items, 2, 6, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
         System.out.println("K = 3, W = 6:");
-        knapsack(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        //knapsack(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        knapsackRecursive(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
+    }
+
+    public static <T> Set<T> knapsackRecursive(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
+        T[] items = (T[]) itemsList.toArray();
+        int N = items.length;
+
+        // No possible solution
+        if (K > N)
+            return new HashSet<>();
+
+        int[] weights = new int[N + 1];
+        for (int i = 0; i < N; ++i)
+            weights[i] = (int) Math.ceil(knapsackHelper.getWeight(items[i]) / scalingFactor);
+
+        // All items needed
+        if (K == N) {
+            int w = 0;
+            for (int wi : weights)
+                w += wi;
+
+            return (w <= W) ? new HashSet<>(itemsList) : new HashSet<>();
+        }
+
+        double[] values = new double[N + 1];
+        for (int i = 0; i < N; ++i)
+            values[i] = knapsackHelper.getValue(items[i]);
+
+        Double[][][] cache = new Double[K + 1][N + 1][W + 1];
+
+        opt(K, N, W, weights, values, cache);
+
+        /*
+        for (int k = K; k >= 0; --k) {
+            System.out.println("k = " + k);
+            for (int i = N; i >= 0; --i) {
+                if (i == 0) {
+                    System.out.println("Item 0 w: - v: -.- : " + Arrays.toString(cache[k][i]));
+                    continue;
+                }
+                System.out.print("Item " + i + " w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
+                System.out.println(Arrays.toString(cache[k][i]));
+            }
+            System.out.println();
+        }
+        System.out.println();
+        //*/
+
+        Set<T> result = new HashSet<>();
+        for (int i = N, w = W, k = K; 0 < k; --i) {
+            // In case there is no solution
+            if (i == 0 && k > 0)
+                return new HashSet<>();
+
+            int wi = weights[i - 1];
+
+            if (wi <= w) {
+                Double actual = cache[k - 1][i - 1][w - wi];
+                double expected = cache[k][i][w] - values[i - 1];
+
+                if ((actual == null && expected == 0.0) || (actual != null && actual == expected)) {
+                    w -= wi;
+                    --k;
+                    T item = items[i - 1];
+                    result.add(item);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static <T> double opt(int k, int i, int w, int weights[], double[] values, Double[][][] cache) {
+        // Returned cached value
+        if (cache[k][i][w] != null)
+            return cache[k][i][w];
+
+        if (i == 0 || k == 0)
+            return 0;
+
+        int wi = weights[i - 1];
+
+        if (w < wi)
+            return opt(k, i - 1, w, weights, values, cache);
+
+
+        double notSelected = opt(k, i - 1, w, weights, values, cache);
+        double selected = opt(k - 1, i - 1, w - wi, weights, values, cache) + values[i - 1];
+
+        // Cache and return value
+        return cache[k][i][w] = Math.max(notSelected, selected);
     }
 
     public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
@@ -112,24 +206,26 @@ public class Knapsack {
         System.out.println();
         //*/
 
+        //System.out.println(cache[K][N][W]);
+
         Set<T> result = new HashSet<>();
         for (int i = N, w = W, k = K; 0 < k; --i) {
             // In case there is no solution
-            if (i == 0 && k > 0) return new HashSet<>();
+            if (i == 0 && k > 0)
+                return new HashSet<>();
 
-            T item = items[i - 1];
-            int wi = (int) Math.ceil(knapsackHelper.getWeight(item) / scalingFactor);
+            int wi = weights[i - 1];
 
             if (wi <= w) {
                 double actual = cache[k - 1][i - 1][w - wi];
-                double expected = cache[k][i][w] - knapsackHelper.getValue(item);
+                double expected = cache[k][i][w] - values[i - 1];
 
                 //System.out.println("[" + (k-1) + ", " + (i-1) + ", " + (w-wi) + "]");
 
                 if (actual == expected) {
                     w -= wi;
                     --k;
-                    result.add(item);
+                    result.add(items[i - 1]);
                 }
             }
         }
