@@ -31,6 +31,7 @@ public class Knapsack {
         knapsack(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
+        /*
         System.out.println("K = 2, W = 8:");
         knapsack(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
@@ -42,6 +43,7 @@ public class Knapsack {
         System.out.println("K = 3, W = 6:");
         knapsack(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
+        */
     }
 
     public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
@@ -96,21 +98,21 @@ public class Knapsack {
             }
         }
 
-        /*
-        for (int k = 1; k <= K; ++k) {
+        //*
+        for (int k = K; k >= 0; --k) {
             System.out.println("k = " + k);
-            for (int i = 0; i <= N; i++) {
+            for (int i = N; i >= 0; --i) {
                 if (i == 0) {
-                    System.out.println("Item w: - v: - : " + Arrays.toString(cache[k][i]));
+                    System.out.println("Item 0 w: - v: -.- : " + Arrays.toString(cache[k][i]));
                     continue;
                 }
-                System.out.print("Item w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
+                System.out.print("Item " + i + " w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
                 System.out.println(Arrays.toString(cache[k][i]));
             }
             System.out.println();
         }
         System.out.println();
-        */
+        //*/
 
         Set<T> result = new HashSet<>();
         for (int i = N, w = W, k = K; 0 < k; --i) {
@@ -123,6 +125,8 @@ public class Knapsack {
             if (wi <= w) {
                 double actual = cache[k - 1][i - 1][w - wi];
                 double expected = cache[k][i][w] - knapsackHelper.getValue(item);
+
+                System.out.println("[" + (k-1) + ", " + (i-1) + ", " + (w-wi) + "]");
 
                 if (actual == expected) {
                     w -= wi;
