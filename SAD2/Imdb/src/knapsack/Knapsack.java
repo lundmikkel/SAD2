@@ -1,15 +1,17 @@
 package knapsack;
 
+import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
+
 import java.util.*;
 
 public class Knapsack {
     public static void main(String[] args) {
         List<Item> items = new ArrayList<>();
         //                  id,  W, v
-        items.add(new Item(" 1", 3, 3));
-        items.add(new Item(" 2", 3, 3));
-        items.add(new Item(" 3", 2, 3));
-        items.add(new Item(" 4", 5, 4));
+        items.add(new Item(" 1", 6, 3));
+        items.add(new Item(" 2", 6, 4));
+        items.add(new Item(" 3", 4, 3));
+        items.add(new Item(" 4", 10, 4));
 
         KnapsackHelper kh = new KnapsackHelper<Item>() {
             @Override
@@ -27,48 +29,51 @@ public class Knapsack {
             System.out.println(i + " : w: " + i.getWeight() + " v: " + i.getValue());
         System.out.println();
 
-        System.out.println("K = 3, W = 8:");
-        //knapsack(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
-        knapsackRecursive(items, 3, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        double sf = 3.0;
+
+        System.out.println("K = 3, W = 16:");
+        knapsack(items, 3, 16, sf, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println();
+        knapsackRecursive(items, 3, 16, sf, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
-        System.out.println("K = 2, W = 8:");
-        //knapsack(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
-        knapsackRecursive(items, 2, 8, 1, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println("K = 2, W = 16:");
+        knapsack(items, 2, 16, sf, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println();
+        knapsackRecursive(items, 2, 16, sf, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
-        System.out.println("K = 2, W = 6:");
-        //knapsack(items, 2, 6, 1, kh).forEach(i -> System.out.print(i + " "));
-        knapsackRecursive(items, 2, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println("K = 2, W = 12:");
+        knapsack(items, 2, 12, sf, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println();
+        knapsackRecursive(items, 2, 12, sf, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
 
-        System.out.println("K = 3, W = 6:");
-        //knapsack(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
-        knapsackRecursive(items, 3, 6, 1, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println("K = 3, W = 12:");
+        knapsack(items, 3, 12, sf, kh).forEach(i -> System.out.print(i + " "));
+        System.out.println();
+        knapsackRecursive(items, 3, 12, sf, kh).forEach(i -> System.out.print(i + " "));
         System.out.println("\n");
     }
 
     private static class Cache {
-        Double[][][] cache;
-
-        public Cache(int X, int Y, int Z) {
-            cache = new Double[X][Y][Z];
-        }
+        HashMap<Key, Double> cache = new HashMap<>();
 
         public boolean contains(int x, int y, int z) {
-            return cache[x][y][z] != null;
+            return cache.containsKey(new Key(x, y, z));
         }
 
-        public double set(int x, int y, int z, double value) {
-            return cache[x][y][z] = value;
+        public void set(int x, int y, int z, double value) {
+            cache.put(new Key(x, y, z), value);
         }
 
         public Double get(int x, int y, int z) {
-            return cache[x][y][z];
+            return cache.get(new Key(x, y, z));
         }
 
         private class Key {
             int x, y, z;
+            int hash = 0;
 
             public Key(int x, int y, int z) {
                 this.x = x;
@@ -78,31 +83,43 @@ public class Knapsack {
 
             @Override
             public int hashCode() {
-                int hash = 31;
-                hash = hash * 23 + x;
-                hash = hash * 41 + y;
-                hash = hash * 29 + z;
+                if (hash == 0) {
+                    hash = 31;
+                    hash = hash * 23 + x;
+                    hash = hash * 41 + y;
+                    hash = hash * 29 + z;
+                }
                 return hash;
             }
 
             @Override
-            public boolean equals(Object obj) {
-                Key that = (Key) obj;
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null)
+                    return false;
 
+                Key that = (Key) o;
                 return this.x == that.x &&
                         this.y == that.y &&
                         this.z == that.z;
             }
+
+            @Override
+            public String toString() {
+                return "(" + x + ", " + y + ", " + z + ")";
+            }
         }
     }
 
-    public static <T> Set<T> knapsackRecursive(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
+    public static <T> List<T> knapsackRecursive(List<T> itemsList, int K, int orgW, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
         T[] items = (T[]) itemsList.toArray();
         int N = items.length;
+        int W = (int) Math.floor(orgW / scalingFactor);
 
         // No possible solution
         if (K > N)
-            return new HashSet<>();
+            return new ArrayList<>(0);
 
         int[] weights = new int[N + 1];
         for (int i = 0; i < N; ++i)
@@ -114,38 +131,22 @@ public class Knapsack {
             for (int wi : weights)
                 w += wi;
 
-            return (w <= W) ? new HashSet<>(itemsList) : new HashSet<>();
+            return (w <= W) ? itemsList : new ArrayList<>(0);
         }
 
         double[] values = new double[N + 1];
         for (int i = 0; i < N; ++i)
             values[i] = knapsackHelper.getValue(items[i]);
 
-        Cache cache = new Cache(K + 1, N + 1, W + 1);
+        Cache cache = new Cache();
 
         opt(K, N, W, weights, values, cache);
 
-        /*
-        for (int k = K; k >= 0; --k) {
-            System.out.println("k = " + k);
-            for (int i = N; i >= 0; --i) {
-                if (i == 0) {
-                    System.out.println("Item 0 w: - v: -.- : " + Arrays.toString(cache[k][i]));
-                    continue;
-                }
-                System.out.print("Item " + i + " w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
-                System.out.println(Arrays.toString(cache[k][i]));
-            }
-            System.out.println();
-        }
-        System.out.println();
-        //*/
-
-        Set<T> result = new HashSet<>();
+        List<T> results = new ArrayList<>(K);
         for (int i = N, w = W, k = K; 0 < k; --i) {
             // In case there is no solution
             if (i == 0 && k > 0)
-                return new HashSet<>();
+                return new ArrayList<>(0);
 
             int wi = weights[i - 1];
 
@@ -156,13 +157,12 @@ public class Knapsack {
                 if ((actual == null && expected == 0.0) || (actual != null && actual == expected)) {
                     w -= wi;
                     --k;
-                    T item = items[i - 1];
-                    result.add(item);
+                    results.add(items[i - 1]);
                 }
             }
         }
 
-        return result;
+        return results;
     }
 
     private static <T> double opt(int k, int i, int w, int weights[], double[] values, Cache cache) {
@@ -183,16 +183,18 @@ public class Knapsack {
         double selected = opt(k - 1, i - 1, w - wi, weights, values, cache) + values[i - 1];
 
         // Cache and return value
-        return cache.set(k, i, w, Math.max(notSelected, selected));
+        double max = Math.max(notSelected, selected);
+        cache.set(k, i, w, max);
+        return max;
     }
 
-    public static <T> Set<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
+    public static <T> List<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper) {
         T[] items = (T[]) itemsList.toArray();
         int N = items.length;
 
         // No possible solution
         if (K > N)
-            return new HashSet<>();
+            return new ArrayList<>(0);
 
         int[] weights = new int[N];
         for (int i = 0; i < N; ++i)
@@ -204,7 +206,7 @@ public class Knapsack {
             for (int wi : weights)
                 w += wi;
 
-            return (w <= W) ? new HashSet<>(itemsList) : new HashSet<>();
+            return (w <= W) ? itemsList : new ArrayList<>(0);
         }
 
         double[] values = new double[N];
@@ -256,11 +258,11 @@ public class Knapsack {
 
         //System.out.println(cache[K][N][W]);
 
-        Set<T> result = new HashSet<>();
+        List<T> results = new ArrayList<>(K);
         for (int i = N, w = W, k = K; 0 < k; --i) {
             // In case there is no solution
             if (i == 0 && k > 0)
-                return new HashSet<>();
+                return new ArrayList<>(0);
 
             int wi = weights[i - 1];
 
@@ -273,11 +275,11 @@ public class Knapsack {
                 if (actual == expected) {
                     w -= wi;
                     --k;
-                    result.add(items[i - 1]);
+                    results.add(items[i - 1]);
                 }
             }
         }
 
-        return result;
+        return results;
     }
 }

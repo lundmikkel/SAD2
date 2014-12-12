@@ -223,9 +223,9 @@ public class ImdbParser {
 
     public static void main(String[] args) {
         Parse("data/imdb-r.txt");
-        List<Movie> movies = Movie.getAll().stream()
-                .filter(m -> m.getRating() >= 9)
-                .collect(Collectors.toList());
+        //List<Movie> movies = Movie.getAll().stream()
+        //        .filter(m -> m.getRating() >= 9)
+        //        .collect(Collectors.toList());
 
         //Actor.getAll().stream().sorted((a,b)-> a.getMovieCount() - b.getMovieCount()).forEach(a -> System.out.println(a + " " + a.getMovieCount()));
 
@@ -251,8 +251,8 @@ public class ImdbParser {
         List<Actor> actors = new ArrayList<>(Actor.getAll());
 
         int K = 10;
-        int W = 60_000;
-        double sf = 1.0d;
+        int W = 60;
+        double sf = 10.0d;
 
         Knapsack.knapsack(actors, K, W, sf, new KnapsackHelper<Actor>() {
             @Override
@@ -267,15 +267,15 @@ public class ImdbParser {
             }
         }).forEach(System.out::println);
 
-        final AtomicInteger W2 = new AtomicInteger(60_000);
-        Set<Movie> solution = new HashSet<>();
-        movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
-        movies.forEach(m -> {
-            if (m.getDuration() <= W2.get()) {
-                solution.add(m);
-                W2.addAndGet(-m.getDuration());
-            }
-        });
-        movies.forEach(System.out::println);
+        //final AtomicInteger W2 = new AtomicInteger(60_000);
+        //Set<Movie> solution = new HashSet<>();
+        //movies.sort((m1, m2) -> m2.getDuration() - m1.getDuration());
+        //movies.forEach(m -> {
+        //    if (m.getDuration() <= W2.get()) {
+        //        solution.add(m);
+        //        W2.addAndGet(-m.getDuration());
+        //    }
+        //});
+        //movies.forEach(System.out::println);
     }
 }
