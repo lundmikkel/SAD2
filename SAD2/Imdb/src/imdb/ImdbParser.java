@@ -25,7 +25,7 @@ public class ImdbParser {
         DIRECTOR_GENRES(8),         // 01000
         MOVIE_GENRES(16),           // 10000
 
-        ALL(~1);
+        ALL(~0);
 
         private final int value;
 
@@ -239,7 +239,7 @@ public class ImdbParser {
         deleteDir(o);
         o.mkdir();
 
-        int moviesPerFile = 100;
+        int moviesPerFile = 10000;
         int tempbreak = 10;
 
         Iterator<Movie> mIt = Movie.getAll().iterator();
@@ -251,10 +251,8 @@ public class ImdbParser {
                 int i = 0;
                 while (mIt.hasNext() && i++ < moviesPerFile) {
                     Movie m = mIt.next();
-                    if (m.getRating() < 0 || m.getRoles().size() < 1) {
-                        --i;
-                        continue;
-                    }
+                    if (/*m.getRating() < 0 ||*/ m.getRoles().size() < 1) { --i; continue;}
+                    w.print(m.getId()+",");
                     w.print(m.getRating());
                     for (Role r : m.getRoles()) {
                         w.print("," + r.getActor().getId());
@@ -284,8 +282,9 @@ public class ImdbParser {
     }
 
     public static void main(String[] args) {
-        int load = Table.getLoad(Table.ACTORS, Table.MOVIES);
+        int load = Table.getLoad(Table.ALL);
         Parse("data/imdb-r.txt", load);
+        OutputMovies("data/ActorRating/");
         //List<Movie> movies = Movie.getAll().stream()
         //        .filter(m -> m.getRating() >= 9)
         //        .collect(Collectors.toList());
@@ -294,7 +293,6 @@ public class ImdbParser {
 
         //if (true)
         //    return;
-
         /*
         System.out.println("Movies:\t"+Movie.count());
         System.out.println("Actors:\t"+Actor.count());
@@ -303,13 +301,13 @@ public class ImdbParser {
         System.out.println("Max Actor id:\t"+Actor.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Max Director id:\t"+Director.getAll().stream().max((x1, x2) -> (int) Math.signum(x1.getId() - x2.getId())).get().getId());
         System.out.println("Movies with rating and actors:\t"+Movie.getAll().stream().filter(m -> m.getRating()>0 && m.getRoles().size() > 0).count());
-        OutputMovies("data/ActorRating/");
 
         System.out.println("DONE");
 
 
         if (true) return;
         */
+
 
 
         /*
