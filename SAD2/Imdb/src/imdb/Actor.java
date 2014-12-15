@@ -72,4 +72,10 @@ public class Actor extends Person {
     }
 
     // endregion
+
+
+    @Override
+    public String toString() {
+        return getName() + " w: " + getName().length() + ", v: " + movieCount;
+    }
 }
