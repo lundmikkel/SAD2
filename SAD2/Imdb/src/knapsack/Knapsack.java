@@ -215,7 +215,7 @@ public class Knapsack {
 
                     // Invalid solution
                     if (i < k) {
-                        cache.set(k, i, w, Double.NaN);
+                        cache.set(k, i, w, Double.NEGATIVE_INFINITY);
                         continue;
                     }
 
@@ -231,7 +231,7 @@ public class Knapsack {
                     double notSelected = cache.get(k, i - 1, w);
 
                     // Save max value
-                    cache.set(k, i, w, max(selected, notSelected));
+                    cache.set(k, i, w, Math.max(selected, notSelected));
                 }
             }
         }
@@ -248,7 +248,7 @@ public class Knapsack {
 
         // Invalid solution
         if (i < k)
-            return cache.set(k, i, w, Double.NaN);
+            return cache.set(k, i, w, Double.NEGATIVE_INFINITY);
 
         // Too heavy, skip
         int wi = weights[i - 1];
@@ -260,15 +260,7 @@ public class Knapsack {
         double notSelected = findOptimalRecursively(k, i - 1, w, weights, values, cache);
 
         // Cache and return max value
-        return cache.set(k, i, w, max(selected, notSelected));
-    }
-
-    private static double max(double a, double b) {
-        if (Double.isNaN(a))
-            return b;
-        if (Double.isNaN(b))
-            return a;
-        return Math.max(a, b);
+        return cache.set(k, i, w, Math.max(selected, notSelected));
     }
 
     private static <T> List<T> backtrackSolution(int K, int N, int W, T[] items, int[] weights, double[] values, Cache cache) {
@@ -277,7 +269,7 @@ public class Knapsack {
         System.out.println("Best solution : " + cache.get(K, N, W));
 
         // Check if there is a solution
-        if (cache.get(K, N, W).isNaN())
+        if (cache.get(K, N, W).isInfinite())
             return results;
 
         // Find the solution
