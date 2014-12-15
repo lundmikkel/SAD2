@@ -5,7 +5,6 @@ import knapsack.KnapsackHelper;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /*
@@ -18,7 +17,43 @@ import java.util.stream.Collectors;
  */
 public class ImdbParser {
 
-    public static void Parse(String filename) {
+    private enum Table {
+        ACTORS(1),                  // 00001
+        DIRECTORS(2),               // 00010
+        MOVIES(4),                  // 00100
+
+        DIRECTOR_GENRES(8),         // 01000
+        MOVIE_GENRES(16),           // 10000
+
+        ALL(~1);
+
+        private final int value;
+
+        private Table(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static boolean shouldLoad(int load, Table... tables) {
+            int value = 0;
+            for (Table table : tables)
+                value |= table.getValue();
+
+            return (load & value) > 0;
+        }
+
+        public static int getLoad(Table... tables) {
+            int value = 0;
+            for (Table table : tables)
+                value |= table.getValue();
+            return value;
+        }
+    }
+
+    public static void Parse(String filename, int load) {
         int dnf = 0, mnf = 0, anf = 0,
                 df = 0, mf = 0, af = 0;
         try {
@@ -36,18 +71,30 @@ public class ImdbParser {
                             if (tokens.length != 5) {
                                 throw new IOException("Actor of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.ACTORS))
+                                break;
+
                             new Actor(Integer.parseInt(tokens[0]), tokens[1], tokens[2], ((tokens[3].equals("M")) ? Gender.Male : Gender.Female), Integer.parseInt(tokens[4]));
                             break;
                         case 2:     //directors
                             if (tokens.length != 3) {
                                 throw new IOException("Director of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.DIRECTORS))
+                                break;
+
                             new Director(Integer.parseInt(tokens[0]), tokens[1], tokens[2]);
                             break;
                         case 3:     //directors_genres
                             if (tokens.length != 3) {
                                 throw new IOException("Directors_genres of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.DIRECTORS, Table.DIRECTOR_GENRES))
+                                break;
+
                             Director dir = Director.get(Integer.parseInt(tokens[0]));
                             if (dir == null) {
                                 //System.out.println("Did not find director with id: " + tokens[0]);
@@ -61,12 +108,20 @@ public class ImdbParser {
                             if (tokens.length != 5) {
                                 throw new IOException("Movie of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.MOVIES))
+                                break;
+
                             new Movie(Integer.parseInt(tokens[0]), tokens[1], Integer.parseInt(tokens[2]), ((tokens[3].equals("NULL")) ? -1 : Float.parseFloat(tokens[3])), Integer.parseInt(tokens[4]));
                             break;
                         case 5:     //movies_directors
                             if (tokens.length != 2) {
                                 throw new IOException("Movies_directors of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.DIRECTORS, Table.MOVIES))
+                                break;
+
                             Director dir2 = Director.get(Integer.parseInt(tokens[1]));
                             Movie mov2 = Movie.get(Integer.parseInt(tokens[0]));
                             if (dir2 == null) {
@@ -84,6 +139,10 @@ public class ImdbParser {
                             if (tokens.length != 2) {
                                 throw new IOException("Movies_genres of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.MOVIE_GENRES))
+                                break;
+
                             Movie mov3 = Movie.get(Integer.parseInt(tokens[0]));
                             if (mov3 == null) {
                                 //System.out.println("Did not find movie with id: " + tokens[0]);
@@ -97,6 +156,10 @@ public class ImdbParser {
                             if (tokens.length != 3) {
                                 throw new IOException("Role of length " + tokens.length + ": " + line);
                             }
+
+                            if (!Table.shouldLoad(load, Table.MOVIES, Table.ACTORS))
+                                break;
+
                             Actor act4 = Actor.get(Integer.parseInt(tokens[0]));
                             Movie mov4 = Movie.get(Integer.parseInt(tokens[1]));
                             if (act4 == null) {
@@ -122,10 +185,9 @@ public class ImdbParser {
             //TODO: to do what?!
             System.out.println("We got a problem: " + ex.getMessage());
         }
-        System.out.println("Directors: Found: " + df + " -  Not found: " + dnf);
-        System.out.println("Actors: Found: " + af + " -  Not found: " + anf);
-        System.out.println("Movies: Found: " + mf + " -  Not found: " + mnf);
-
+        //System.out.println("Directors: Found: " + df + " -  Not found: " + dnf);
+        //System.out.println("Actors: Found: " + af + " -  Not found: " + anf);
+        //System.out.println("Movies: Found: " + mf + " -  Not found: " + mnf);
     }
 
     private static String[] ParseLine(String line) {
@@ -182,20 +244,20 @@ public class ImdbParser {
 
         Iterator<Movie> mIt = Movie.getAll().iterator();
         int numFiles = 0;
-        while(mIt.hasNext()) {
+        while (mIt.hasNext()) {
             String filename = numFiles++ + "";
             try {
-                PrintWriter w = new PrintWriter(outputFolder + "/" +filename, "UTF-8");
+                PrintWriter w = new PrintWriter(outputFolder + "/" + filename, "UTF-8");
                 int i = 0;
-                while(mIt.hasNext() && i++ < moviesPerFile) {
+                while (mIt.hasNext() && i++ < moviesPerFile) {
                     Movie m = mIt.next();
-                    if(m.getRating()<0 || m.getRoles().size() < 1) {
+                    if (m.getRating() < 0 || m.getRoles().size() < 1) {
                         --i;
                         continue;
                     }
                     w.print(m.getRating());
                     for (Role r : m.getRoles()) {
-                        w.print(","+r.getActor().getId());
+                        w.print("," + r.getActor().getId());
                     }
                     w.println();
                 }
@@ -222,7 +284,8 @@ public class ImdbParser {
     }
 
     public static void main(String[] args) {
-        Parse("data/imdb-r.txt");
+        int load = Table.getLoad(Table.ACTORS, Table.MOVIES);
+        Parse("data/imdb-r.txt", load);
         //List<Movie> movies = Movie.getAll().stream()
         //        .filter(m -> m.getRating() >= 9)
         //        .collect(Collectors.toList());
@@ -248,13 +311,31 @@ public class ImdbParser {
         if (true) return;
         */
 
-        List<Actor> actors = new ArrayList<>(Actor.getAll());
 
-        int K = 10;
-        int W = 60;
-        double sf = 10.0d;
+        /*
+        actors.sort((x, y) -> x.getName().length() - y.getName().length());
 
-        Knapsack.knapsack(actors, K, W, sf, new KnapsackHelper<Actor>() {
+        int max = actors.get(actors.size() - 1).getName().length();
+
+        int[] histogram = new int[max + 1];
+
+        for (Actor actor : actors) {
+            int length = actor.getName().length();
+            histogram[length]++;
+        }
+
+        for (int i = 1; i <= max; ++i) {
+            System.out.printf("%3d -> %7d\n", i, histogram[i]);
+        }
+
+        if (true) return;
+        //*/
+
+        int K = 14;
+        int W = 105;
+        double sf = 1.0d;
+
+        KnapsackHelper<Actor> knapsackHelper = new KnapsackHelper<Actor>() {
             @Override
             public int getWeight(Actor actor) {
                 return actor.getName().length();
@@ -265,7 +346,69 @@ public class ImdbParser {
                 // TODO: Update to proper rating
                 return actor.getMovieCount();
             }
-        }).forEach(System.out::println);
+        };
+
+
+        List<Actor> actors = Actor.getAll().stream()
+                .limit(2000)
+                        //.sorted((x, y) -> { int compare = knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y); return compare != 0 ? compare : Double.compare(knapsackHelper.getValue(y), knapsackHelper.getValue(x));})
+                .collect(Collectors.toList());
+
+
+        long start = System.currentTimeMillis();
+        int weight = 0;
+        int value = 0;
+        List<Actor> cast = new ArrayList<>(K);
+
+        /*for (int k = 0; k < K; ++k) {
+            Actor actor = actors.get(k);
+
+            cast.add(actor);
+            weight += knapsackHelper.getWeight(actor);
+            value += knapsackHelper.getValue(actor);
+        }
+        if (weight > W)
+            cast.clear();
+
+        System.out.println("\nWeight: " + weight + ", value: " + value);
+        cast.forEach(System.out::println);*/
+
+
+        start = System.currentTimeMillis();
+        cast = Knapsack.knapsack(actors, K, W, sf, knapsackHelper, false);
+        System.out.println("\nTime: " + (System.currentTimeMillis() - start));
+
+        cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
+
+        weight = 0;
+        value = 0;
+        for (Actor actor : cast) {
+            weight += knapsackHelper.getWeight(actor);
+            value += knapsackHelper.getValue(actor);
+        }
+
+        System.out.println("Weight: " + weight + ", value: " + value);
+        cast.forEach(System.out::println);
+
+
+        start = System.currentTimeMillis();
+        cast = Knapsack.knapsack(actors, K, W, sf, knapsackHelper, true);
+        System.out.println("\nTime: " + (System.currentTimeMillis() - start));
+
+        cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
+
+        weight = 0;
+        value = 0;
+        for (Actor actor : cast) {
+            weight += knapsackHelper.getWeight(actor);
+            value += knapsackHelper.getValue(actor);
+        }
+
+        System.out.println("Weight: " + weight + ", value: " + value);
+        cast.forEach(System.out::println);
+
+        System.out.println("Done");
+
 
         //final AtomicInteger W2 = new AtomicInteger(60_000);
         //Set<Movie> solution = new HashSet<>();
