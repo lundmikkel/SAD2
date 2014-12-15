@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ImdbActorRank {
     public static void main(String[] args) throws Exception {
-        ImdbParser.Parse("data/imdb-r.txt");
+        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.getLoad(ImdbParser.Table.ACTORS));
 
         // Parse movies to list of tuples of movie -> actor list
         Collection<Movie> movies = Movie.getAll();
