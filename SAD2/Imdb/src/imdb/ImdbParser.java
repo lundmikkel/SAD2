@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class ImdbParser {
 
-    private enum Table {
+    public enum Table {
         ACTORS(1),                  // 00001
         DIRECTORS(2),               // 00010
         MOVIES(4),                  // 00100

@@ -6,6 +6,7 @@ import engine.ReduceSkipper;
 import engine.Tuple;
 import imdb.Actor;
 import imdb.ImdbParser;
+import imdb.ImdbParser.Table;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,8 +21,8 @@ public class Main {
         List<Tuple<String, String>> files = new ArrayList<>();
         scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
 
-
-        ImdbParser.Parse("data/imdb-r.txt");
+        int load = ImdbParser.Table.getLoad(Table.ACTORS);
+        ImdbParser.Parse("data/imdb-r.txt", load);
         float alpha = 0.1f;
         int actorCount = 460018;
 
