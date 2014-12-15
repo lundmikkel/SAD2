@@ -23,15 +23,16 @@ public class Main {
 
         int load = ImdbParser.Table.getLoad(Table.ACTORS);
         ImdbParser.Parse("data/imdb-r.txt", load);
-        float alpha = 0.1f;
-        int actorCount = 460018;
 
+        float dampingFactor = 0.85f;
+        int actorCount = Actor.count();
         List<Tuple<Integer, Float>> result = new Executor(files)
                 .add(new FileLoaderMapper(), new ReduceSkipper())
                 .add(new GraphBuildMapper(), new GraphBuildReducer())
                 .add(new TransformMapper(), new ReduceSkipper(false))
-                .add(new ActorRatingMapper(alpha, actorCount), new ReduceSkipper(false), 5)
-                .add(new ActorRatingOutputMapper(), new ActorRatingOutputReducer()).execute();
+                .add(new ActorRatingMapper(dampingFactor, actorCount), new ReduceSkipper(false), 5)
+                .add(new ActorRatingOutputMapper(), new ActorRatingOutputReducer())
+                .execute();
 
         Collections.sort(result, (a1, a2) -> (int)Math.signum(a2.value - a1.value));
         PrintWriter pw = new PrintWriter(new File("data/MRoutput.txt"));

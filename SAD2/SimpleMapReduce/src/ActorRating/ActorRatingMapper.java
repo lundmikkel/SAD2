@@ -5,11 +5,11 @@ import engine.Mapper;
 import engine.Triple;
 
 public class ActorRatingMapper implements Mapper<Integer, Iterable<Triple<Float, Integer, Float>>, Integer, Triple<Float, Integer, Float>> {
-    final float alpha;
+    final float dampingFactor;
     final int actorCount;
 
-    public ActorRatingMapper(float alpha, int actorCount) {
-        this.alpha = alpha;
+    public ActorRatingMapper(float dampingFactor, int actorCount) {
+        this.dampingFactor = dampingFactor;
         this.actorCount = actorCount;
     }
 
@@ -21,7 +21,7 @@ public class ActorRatingMapper implements Mapper<Integer, Iterable<Triple<Float,
             sum += connection.item1 * connection.item3;
             count++;
         }
-        Float actorRatingA = alpha / actorCount + (1 - alpha) * (sum / count);
+        Float actorRatingA = (1 - dampingFactor) / actorCount + dampingFactor * (sum / count);
         for (Triple<Float, Integer, Float> connection : connections) {
             collector.collect(connection.item2, connection.update(connection.item1, actorA, actorRatingA));
         }

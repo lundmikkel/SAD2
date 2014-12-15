@@ -199,6 +199,7 @@ public class Knapsack {
     // region Find Optimal Solution
 
     private static void findOptimalIteratively(int K, int N, int W, int[] weights, double[] values, Cache cache) {
+        // Iterate each cardinality
         for (int k = 0; k <= K; ++k) {
 
             // Iterate options
