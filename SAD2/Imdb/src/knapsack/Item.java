@@ -1,31 +1,19 @@
 package knapsack;
 
 public class Item{
-    private final int weight;
-    private final int value;
-    private final String name;
+    public final int weight;
+    public final int profit;
+    public final String name;
 
-    public Item(String name, int weight, int value)
+    public Item(String name, int weight, int profit)
     {
         this.name = name;
         this.weight = weight;
-        this.value = value;
+        this.profit = profit;
     }
 
     @Override
     public String toString() {
-        return getName();
-    }
-
-    public int getWeight() {
-        return weight;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public String getName() {
         return name;
     }
 }

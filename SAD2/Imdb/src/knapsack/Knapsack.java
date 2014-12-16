@@ -9,36 +9,36 @@ public class Knapsack {
         KnapsackHelper kh = new KnapsackHelper<Item>() {
             @Override
             public int getWeight(Item item) {
-                return item.getWeight();
+                return item.weight;
             }
 
             @Override
             public double getValue(Item item) {
-                return item.getValue();
+                return item.profit;
             }
         };
 
         List<Item> test = new ArrayList<>(3);
-        test.add(new Item(" 3", 3, 3));
-        test.add(new Item(" 2", 1, 1));
         test.add(new Item(" 1", 1, 1));
+        test.add(new Item(" 2", 1, 1));
+        test.add(new Item(" 3", 3, 3));
 
         System.out.println("Iterative version:");
-        knapsack(test, 1, 3, 1.0d, kh, true).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 1, 3, kh, true).forEach(i -> System.out.println("- " + i));
         System.out.println("Recursive version:");
-        knapsack(test, 1, 3, 1.0d, kh, false).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 1, 3, kh, false).forEach(i -> System.out.println("- " + i));
         System.out.println();
 
         System.out.println("Iterative version:");
-        knapsack(test, 2, 3, 1.0d, kh, true).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 2, 3, kh, true).forEach(i -> System.out.println("- " + i));
         System.out.println("Recursive version:");
-        knapsack(test, 2, 3, 1.0d, kh, false).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 2, 3, kh, false).forEach(i -> System.out.println("- " + i));
         System.out.println();
 
         System.out.println("Iterative version:");
-        knapsack(test, 3, 3, 1.0d, kh, true).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 3, 3, kh, true).forEach(i -> System.out.println("- " + i));
         System.out.println("Recursive version:");
-        knapsack(test, 3, 3, 1.0d, kh, false).forEach(i -> System.out.println("- " + i));
+        knapsack(test, 3, 3, kh, false).forEach(i -> System.out.println("- " + i));
         System.out.println();
     }
 
@@ -48,22 +48,26 @@ public class Knapsack {
 
     private static interface Cache {
         boolean contains(int x, int y, int z);
-
         double set(int x, int y, int z, double value);
-
         Double get(int x, int y, int z);
     }
 
     private static class ArrayCache implements Cache {
-        Double[][][] cache;
+        double[][][] cache;
 
         public ArrayCache(int X, int Y, int Z) {
-            cache = new Double[X + 1][Y + 1][Z + 1];
+            cache = new double[X + 1][Y + 1][Z + 1];
+
+            for (int y = 0; y < Y; ++y) {
+                for (int x = 0; x < X; ++x) {
+                    Arrays.fill(cache[x][y], Double.NaN);
+                }
+            }
         }
 
         @Override
         public boolean contains(int x, int y, int z) {
-            return cache[x][y][z] != null;
+            return Double.isNaN(cache[x][y][z]);
         }
 
         @Override
@@ -149,23 +153,17 @@ public class Knapsack {
 
     // endregion Cache
 
-    public static <T> List<T> knapsack(List<T> itemsList, int K, int W, double scalingFactor, KnapsackHelper<T> knapsackHelper, boolean iterative) {
+    public static <T> List<T> knapsack(List<T> itemsList, int K, int W, KnapsackHelper<T> knapsackHelper, boolean iterative) {
         T[] items = (T[]) itemsList.toArray();
         int N = items.length;
 
         int[] weights = new int[N];
-        double[] values = new double[N];
-
-        // Scaling
-        W = (int) Math.floor(W / scalingFactor);
-        for (int i = 0; i < N; ++i) {
-            weights[i] = (int) Math.ceil(weights[i] / scalingFactor);
-        }
+        double[] profits = new double[N];
 
         // Caching
         for (int i = 0; i < N; ++i) {
             weights[i] = knapsackHelper.getWeight(items[i]);
-            values[i] = knapsackHelper.getValue(items[i]);
+            profits[i] = knapsackHelper.getValue(items[i]);
         }
 
         // Create cache
@@ -173,41 +171,22 @@ public class Knapsack {
 
         // Find optimal solution
         if (iterative)
-            findOptimalIteratively(K, N, W, weights, values, cache);
+            findOptimalIteratively(K, N, W, weights, profits, cache);
         else
-            findOptimalRecursively(K, N, W, weights, values, cache);
+            findOptimalRecursively(K, N, W, weights, profits, cache);
 
-        /*
-        for (int k = K; k >= 0; --k) {
-            System.out.println("k = " + k);
-            for (int i = N; i >= 0; --i) {
-                if (i == 0) {
-                    System.out.println("Item 0 w: - v: -.- : " + Arrays.toString(cache[k][i]));
-                    continue;
-                }
-                System.out.print("Item " + i + " w: " + weights[i - 1] + " v: " + values[i - 1] + " : ");
-                System.out.println(Arrays.toString(cache[k][i]));
-            }
-            System.out.println();
-        }
-        System.out.println();
-        //*/
-
-        return backtrackSolution(K, N, W, items, weights, values, cache);
+        return backtrackSolution(K, N, W, items, weights, profits, cache);
     }
 
     // region Find Optimal Solution
 
-    private static void findOptimalIteratively(int K, int N, int W, int[] weights, double[] values, Cache cache) {
+    private static void findOptimalIteratively(int K, int N, int W, int[] weights, double[] profits, Cache cache) {
         // Iterate each cardinality
         for (int k = 0; k <= K; ++k) {
-
             // Iterate options
             for (int i = 0; i <= N; ++i) {
-
                 // Iterate weight limits
                 for (int w = 0; w <= W; ++w) {
-
                     // All positions have been filled
                     if (k == 0) {
                         cache.set(k, i, w, 0.0);
@@ -228,7 +207,7 @@ public class Knapsack {
                     }
 
                     // Get possible values
-                    double selected = cache.get(k - 1, i - 1, w - wi) + values[i - 1];
+                    double selected = cache.get(k - 1, i - 1, w - wi) + profits[i - 1];
                     double notSelected = cache.get(k, i - 1, w);
 
                     // Save max value
@@ -238,7 +217,7 @@ public class Knapsack {
         }
     }
 
-    private static double findOptimalRecursively(int k, int i, int w, int weights[], double[] values, Cache cache) {
+    private static double findOptimalRecursively(int k, int i, int w, int weights[], double[] profits, Cache cache) {
         // Returned cached value
         if (cache.contains(k, i, w))
             return cache.get(k, i, w);
@@ -254,35 +233,33 @@ public class Knapsack {
         // Too heavy, skip
         int wi = weights[i - 1];
         if (w < wi)
-            return cache.set(k, i, w, findOptimalRecursively(k, i - 1, w, weights, values, cache));
+            return cache.set(k, i, w, findOptimalRecursively(k, i - 1, w, weights, profits, cache));
 
         // Get possible values
-        double selected = findOptimalRecursively(k - 1, i - 1, w - wi, weights, values, cache) + values[i - 1];
-        double notSelected = findOptimalRecursively(k, i - 1, w, weights, values, cache);
+        double selected = findOptimalRecursively(k - 1, i - 1, w - wi, weights, profits, cache) + profits[i - 1];
+        double notSelected = findOptimalRecursively(k, i - 1, w, weights, profits, cache);
 
         // Cache and return max value
         return cache.set(k, i, w, Math.max(selected, notSelected));
     }
 
-    private static <T> List<T> backtrackSolution(int K, int N, int W, T[] items, int[] weights, double[] values, Cache cache) {
+    private static <T> List<T> backtrackSolution(int K, int N, int W, T[] items, int[] weights, double[] profits, Cache cache) {
         List<T> results = new ArrayList<>(K);
-
-        System.out.println("Best solution : " + cache.get(K, N, W));
 
         // Check if there is a solution
         if (cache.get(K, N, W).isInfinite())
             return results;
 
         // Find the solution
-        for (int i = N, w = W, k = K; k > 0 && i > 0; --i) {
+        for (int i = N, w = W, k = K; k > 0; --i) {
             // Check if option fits current weight
             int wi = weights[i - 1];
             if (wi <= w) {
                 // Get the actual and expected values
                 Double actual = cache.get(k - 1, i - 1, w - wi);
-                double expected = cache.get(k, i, w) - values[i - 1];
+                double expected = cache.get(k, i, w) - profits[i - 1];
 
-                if (actual != null && actual == expected) {
+                if (actual != null && equals(actual, expected)) {
                     // Pick option and correct parameters
                     w -= wi;
                     k -= 1;
@@ -292,6 +269,10 @@ public class Knapsack {
         }
 
         return results;
+    }
+
+    private static boolean equals(double x, double y) {
+        return Math.abs(x - y) < 1e-10;
     }
 
     // endregion Find Optimal Solution
