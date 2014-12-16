@@ -8,12 +8,11 @@ import imdb.Actor;
 import imdb.ImdbParser;
 import imdb.ImdbParser.Table;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class Main {
 
@@ -21,11 +20,11 @@ public class Main {
         List<Tuple<String, String>> files = new ArrayList<>();
         scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
 
-        int load = ImdbParser.Table.getLoad(Table.ACTORS);
+        int load = ImdbParser.Table.getLoad(Table.ACTORS, Table.MOVIES);
         ImdbParser.Parse("data/imdb-r.txt", load);
 
         float dampingFactor = 0.85f;
-        int actorCount = Actor.count();
+        int actorCount = 460428;
         List<Tuple<Integer, Float>> result = new Executor(files)
                 .add(new FileLoaderMapper(), new ReduceSkipper())
                 .add(new GraphBuildMapper(), new GraphBuildReducer())

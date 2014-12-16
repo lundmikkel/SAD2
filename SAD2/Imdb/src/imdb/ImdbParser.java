@@ -53,6 +53,10 @@ public class ImdbParser {
         }
     }
 
+    public static void Parse(String filename) {
+        Parse(filename, Table.getLoad(Table.ALL));
+    }
+
     public static void Parse(String filename, int load) {
         int dnf = 0, mnf = 0, anf = 0,
                 df = 0, mf = 0, af = 0;
@@ -240,7 +244,6 @@ public class ImdbParser {
         o.mkdir();
 
         int moviesPerFile = 10000;
-        int tempbreak = 10;
 
         Iterator<Movie> mIt = Movie.getAll().iterator();
         int numFiles = 0;
@@ -251,7 +254,7 @@ public class ImdbParser {
                 int i = 0;
                 while (mIt.hasNext() && i++ < moviesPerFile) {
                     Movie m = mIt.next();
-                    if (/*m.getRating() < 0 ||*/ m.getRoles().size() < 1) { --i; continue;}
+                    if (m.getRating() < 0 || m.getRoles().size() < 1) { --i; continue;}
                     w.print(m.getId()+",");
                     w.print(m.getRating());
                     for (Role r : m.getRoles()) {
@@ -266,6 +269,7 @@ public class ImdbParser {
             }
             //if (--tempbreak < 1) break;
         }
+        System.out.println("Done outputting files.");
     }
 
     public static boolean deleteDir(File dir) {
@@ -282,8 +286,7 @@ public class ImdbParser {
     }
 
     public static void main(String[] args) {
-        int load = Table.getLoad(Table.ALL);
-        Parse("data/imdb-r.txt", load);
+        Parse("data/imdb-r.txt");
         OutputMovies("data/ActorRating/");
         //List<Movie> movies = Movie.getAll().stream()
         //        .filter(m -> m.getRating() >= 9)

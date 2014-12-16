@@ -11,6 +11,16 @@ public class Actor extends Person {
     private final int movieCount;
     private final Set<Role> roles;
 
+    public double getCustomRating() {
+        return customRating;
+    }
+
+    public void setCustomRating(double customRating) {
+        this.customRating = customRating;
+    }
+
+    private double customRating;
+
     // endregion
 
     // region Constructor
@@ -45,6 +55,16 @@ public class Actor extends Person {
         return movieCount;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public String getFirstMovieTitle() {
+        for (Role role : roles)
+            return String.format(Locale.US, "%s (%.1f)", role.getMovie().getTitle(), role.getMovie().getRating());
+        return "";
+    }
+
     // endregion
 
     //region Adders
@@ -76,6 +96,6 @@ public class Actor extends Person {
 
     @Override
     public String toString() {
-        return getName() + " w: " + getName().length() + ", v: " + movieCount;
+        return getName();
     }
 }
