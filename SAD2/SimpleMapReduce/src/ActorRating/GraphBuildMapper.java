@@ -20,15 +20,11 @@ public class GraphBuildMapper implements Mapper<String, String, Integer, Tuple<F
             float movieRating = Float.parseFloat(lineTokenizer.nextToken()) / 10;
             //Parse all actors
             List<Integer> actors = new ArrayList<>();
-            while (lineTokenizer.hasMoreTokens()) {
+            while (lineTokenizer.hasMoreTokens())
                 actors.add(Integer.parseInt(lineTokenizer.nextToken()));
-            }
             //Generate graph
-            for (int actorA : actors) {
-                actors.stream().filter(actorB -> actorA != actorB).forEach(actorB -> {
-                    collector.collect(actorA, new Tuple<>(movieRating, actorB));
-                });
-            }
+            for (int actorA : actors)
+                actors.stream().filter(actorB -> actorA != actorB).forEach(actorB -> collector.collect(actorA, new Tuple<>(movieRating, actorB)));
         }
     }
 }

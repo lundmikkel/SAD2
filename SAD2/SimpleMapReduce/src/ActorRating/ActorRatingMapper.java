@@ -22,8 +22,7 @@ public class ActorRatingMapper implements Mapper<Integer, Iterable<Triple<Float,
             count++;
         }
         Float actorRatingA = (1 - dampingFactor) / actorCount + dampingFactor * (sum / count);
-        for (Triple<Float, Integer, Float> connection : connections) {
+        for (Triple<Float, Integer, Float> connection : connections)
             collector.collect(connection.item2, connection.update(connection.item1, actorA, actorRatingA));
-        }
     }
 }
