@@ -2,8 +2,6 @@ package knapsack;
 
 import imdb.Actor;
 import imdb.ImdbParser;
-import imdb.Movie;
-import sun.rmi.server.InactiveGroupException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,9 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by lundmikkel on 16/12/14.
- */
 public class Main {
     public static void main(String[] args) throws IOException {
         int load = ImdbParser.Table.getLoad(ImdbParser.Table.ACTORS, ImdbParser.Table.MOVIES);
@@ -34,12 +29,9 @@ public class Main {
             }
         }
 
-        int K = 14;
-        int W = 160;
-        double sf = 1d;
+        int K = 20;
+        int W = 106;
 
-
-        List<Actor> cast = null;
         KnapsackHelper<Actor> knapsackHelper = new KnapsackHelper<Actor>() {
             @Override
             public int getWeight(Actor actor) {
@@ -52,11 +44,8 @@ public class Main {
         };
 
         System.out.println("Calculating best cast.");
-        for (W = 160; W >= 150; --W) {
-            System.out.println("W: " + W);
-            cast = Knapsack.knapsack(actors, K, W, sf, knapsackHelper, true);
-            cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
-        }
+        List<Actor> cast = Knapsack.knapsack(actors, K, W, knapsackHelper, true);
+        cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
 
         int weight = 0;
         double profit = 0;
