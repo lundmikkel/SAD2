@@ -22,15 +22,6 @@ public class Movie {
     // region Constructor
 
     public Movie(int id, String title, int year, float rating, int duration) {
-        if (id < 0)
-            throw new IllegalArgumentException("id must be non-negative");
-        if (title == null)
-            throw new IllegalArgumentException("title cannot be null");
-        if (year < 0)
-            throw new IllegalArgumentException("year must be non-negative");
-        if (duration < 0)
-            throw new IllegalArgumentException("duration must be non-negative");
-
         this.id = id;
         this.title = title;
         this.year = year;
@@ -81,9 +72,6 @@ public class Movie {
     // region Adders
 
     public boolean addDirector(Director director) {
-        if (director == null)
-            throw new IllegalArgumentException("director cannot be null");
-        
         boolean result = directors.add(director);
 
         if (result)
@@ -93,14 +81,10 @@ public class Movie {
     }
 
     public boolean addGenre(String genre) {
-        if (genre == null)
-            throw new IllegalArgumentException("genre cannot be null");
         return genres.add(genre);
     }
 
     public boolean addRole(Role role) {
-        if (role == null)
-            throw new IllegalArgumentException("role cannot be null");
         return roles.add(role);
     }
 
