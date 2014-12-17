@@ -57,6 +57,7 @@ public class ImdbParser {
                 if (line.startsWith("LOCK TABLES") && line.endsWith("WRITE;")) {
                     String table = line.substring(13, line.lastIndexOf("WRITE;") - 2);
                     System.out.println("Parsing: " + table.replace('_', ' '));
+                    mode++;
                 } else {
                     String[] tokens = ParseLine(line);
                     switch (mode) {
