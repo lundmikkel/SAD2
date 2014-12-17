@@ -7,6 +7,7 @@ import engine.Tuple;
 import imdb.Actor;
 import imdb.ImdbParser;
 import imdb.ImdbParser.Table;
+import imdb.Movie;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -16,7 +17,10 @@ import java.util.Locale;
 
 public class Main {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
+        //System.out.printf(Locale.US, "%-40s & %-40s & %.3f \\\\\n", "Rob Aguilar",  Actor.get(20).getRoles().iterator().next().getMovie().getTitle(), 0.3055904);
+
+
         List<Tuple<String, String>> files = new ArrayList<>();
         scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
 
@@ -39,7 +43,14 @@ public class Main {
         pw.flush();
         pw.close();
 
-        result.stream().limit(100).forEach(a -> System.out.println(Actor.get(a.key)+": "+a.value));
+        try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("data/movie_cast.txt", true)))) {
+            for (Tuple<Integer, Float> tuple : result) {
+                Actor actor = Actor.get(tuple.key);
+                out.printf(Locale.US, "%d\t%d\t%f\n", actor.getId(), actor.getMovieCount(), tuple.value);
+            }
+        }
+
+        // System.out.printf(Locale.US, "%-30s & %-40s & %.3f \\\\\n", Actor.get(a.key).getName(), Actor.get(a.key).getFirstMovieTitle(), a.value));
     }
 
     private static List<String> scanDir(String dir){

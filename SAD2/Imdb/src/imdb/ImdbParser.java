@@ -247,6 +247,8 @@ public class ImdbParser {
 
         Iterator<Movie> mIt = Movie.getAll().iterator();
         int numFiles = 0;
+        int movieCount = 0;
+        Set<Integer> actorIds = new HashSet<>();
         while (mIt.hasNext()) {
             String filename = numFiles++ + "";
             try {
@@ -261,6 +263,9 @@ public class ImdbParser {
                         w.print("," + r.getActor().getId());
                     }
                     w.println();
+                    movieCount++;
+                    for (Role role : m.getRoles())
+                        actorIds.add(role.getActor().getId());
                 }
                 w.close();
             } catch (IOException e) {
@@ -269,6 +274,8 @@ public class ImdbParser {
             }
             //if (--tempbreak < 1) break;
         }
+        System.out.println("Movie count: " + movieCount);
+        System.out.println("Actor count: " + actorIds.size());
         System.out.println("Done outputting files.");
     }
 
@@ -333,7 +340,7 @@ public class ImdbParser {
         //*/
 
         int K = 14;
-        int W = 105;
+        int W = 106;
         double sf = 1.0d;
 
         KnapsackHelper<Actor> knapsackHelper = new KnapsackHelper<Actor>() {
@@ -352,7 +359,7 @@ public class ImdbParser {
 
         List<Actor> actors = Actor.getAll().stream()
                 .limit(2000)
-                        //.sorted((x, y) -> { int compare = knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y); return compare != 0 ? compare : Double.compare(knapsackHelper.getValue(y), knapsackHelper.getValue(x));})
+                        //.sorted((x, y) -> { int compare = knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y); return compare != 0 ? compare : Double.compare(knapsackHelper.getProfit(y), knapsackHelper.getProfit(x));})
                 .collect(Collectors.toList());
 
 
@@ -366,7 +373,7 @@ public class ImdbParser {
 
             cast.add(actor);
             weight += knapsackHelper.getWeight(actor);
-            value += knapsackHelper.getValue(actor);
+            value += knapsackHelper.getProfit(actor);
         }
         if (weight > W)
             cast.clear();
@@ -376,7 +383,7 @@ public class ImdbParser {
 
 
         start = System.currentTimeMillis();
-        cast = Knapsack.knapsack(actors, K, W, sf, knapsackHelper, false);
+        cast = Knapsack.knapsack(actors, K, W, knapsackHelper, false);
         System.out.println("\nTime: " + (System.currentTimeMillis() - start));
 
         cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
@@ -393,7 +400,7 @@ public class ImdbParser {
 
 
         start = System.currentTimeMillis();
-        cast = Knapsack.knapsack(actors, K, W, sf, knapsackHelper, true);
+        cast = Knapsack.knapsack(actors, K, W, knapsackHelper, true);
         System.out.println("\nTime: " + (System.currentTimeMillis() - start));
 
         cast.sort((x, y) -> knapsackHelper.getWeight(x) - knapsackHelper.getWeight(y));
