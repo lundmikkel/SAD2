@@ -44,10 +44,11 @@ public class ImdbParser {
     }
 
     public static void Parse(String filename) {
-        Parse(filename, Table.getLoad(Table.ALL));
+        Parse(filename, Table.ALL);
     }
 
-    public static void Parse(String filename, int load) {
+    public static void Parse(String filename, Table... tables) {
+        int load = Table.getLoad(tables);
         try {
             BufferedReader r = new BufferedReader(new FileReader(filename));
             String line = r.readLine();

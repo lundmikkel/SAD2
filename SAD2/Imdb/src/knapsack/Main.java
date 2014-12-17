@@ -11,14 +11,12 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        int load = ImdbParser.Table.getLoad(ImdbParser.Table.ACTORS, ImdbParser.Table.MOVIES);
-        ImdbParser.Parse("data/imdb-r.txt", load);
-
+        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.ACTORS, ImdbParser.Table.MOVIES);
 
         List<Actor> actors = new ArrayList<>();
 
         System.out.println("Reading ratings from file.");
-        try(BufferedReader br = new BufferedReader(new FileReader("data/movie_cast.txt"))) {
+        try(BufferedReader br = new BufferedReader(new FileReader("data/MovieCast.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split("\t");

@@ -23,7 +23,7 @@ public class Main {
         scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
 
 
-        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.getLoad(ImdbParser.Table.ACTORS));
+        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.ACTORS);
 
         Executor executor = new Executor(files)
                 .add(new FileLoaderMapper(), new ReduceSkipper())

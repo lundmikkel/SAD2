@@ -21,8 +21,7 @@ public class Main {
         List<Tuple<String, String>> files = new ArrayList<>();
         scanDir("data/ActorRating/").forEach((s) -> files.add(new Tuple<>(s,"")));
 
-        int load = ImdbParser.Table.getLoad(Table.ACTORS, Table.MOVIES);
-        ImdbParser.Parse("data/imdb-r.txt", load);
+        ImdbParser.Parse("data/imdb-r.txt", Table.ACTORS, Table.MOVIES);
 
         float dampingFactor = 0.85f;
         int actorCount = 460428;

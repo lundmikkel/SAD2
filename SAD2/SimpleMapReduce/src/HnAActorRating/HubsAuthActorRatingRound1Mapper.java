@@ -4,9 +4,6 @@ import engine.Collector;
 import engine.Mapper;
 import engine.Tuple;
 
-/**
- * Created by marcher89 on 15/12/14.
- */
 public class HubsAuthActorRatingRound1Mapper implements Mapper<
         ActorMovie,
         Iterable<ActorMovie>,

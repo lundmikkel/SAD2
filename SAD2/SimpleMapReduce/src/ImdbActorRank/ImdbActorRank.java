@@ -6,13 +6,12 @@ import engine.Tuple;
 import imdb.Actor;
 import imdb.ImdbParser;
 import imdb.Movie;
-import imdb.Role;
 
 import java.util.*;
 
 public class ImdbActorRank {
     public static void main(String[] args) throws Exception {
-        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.getLoad(ImdbParser.Table.ACTORS));
+        ImdbParser.Parse("data/imdb-r.txt", ImdbParser.Table.ACTORS);
 
         // Parse movies to list of tuples of movie -> actor list
         Collection<Movie> movies = Movie.getAll();
@@ -23,10 +22,10 @@ public class ImdbActorRank {
             input.add(new Tuple<>(movie, actors));
         }
 
+        float dampingFactor = 0.85f;
         List<Tuple<Actor, Tuple<Actor, Double>>> ranks = new Executor(input)
-                //.add(new EdgeCounter(), new ReduceSkipper())
                 .add(new EdgeMapper(), new ReduceSkipper())
-                .add(new ActorRankMapper(), new ReduceSkipper())
+                .add(new ActorRankMapper(dampingFactor), new ReduceSkipper())
                 .execute();
 
         System.out.println("Result: " + ranks.size());

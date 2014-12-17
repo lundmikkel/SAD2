@@ -4,9 +4,6 @@ import engine.Collector;
 import engine.Reducer;
 import engine.Tuple;
 
-/**
- * Created by marcher89 on 15/12/14.
- */
 public class HubsAuthActorRatingRound1Reducer implements Reducer<
         Character,
         Tuple<ActorMovie, Iterable<ActorMovie>>,

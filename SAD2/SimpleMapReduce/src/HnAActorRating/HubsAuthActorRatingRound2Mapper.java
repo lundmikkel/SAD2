@@ -2,9 +2,6 @@ package HnAActorRating;
 
 import engine.*;
 
-/**
- * Created by marcher89 on 15/12/14.
- */
 public class HubsAuthActorRatingRound2Mapper implements Mapper<
         ActorMovie,
         Iterable<ActorMovie>,

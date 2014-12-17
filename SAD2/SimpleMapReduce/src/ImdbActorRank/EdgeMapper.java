@@ -18,9 +18,7 @@ public class EdgeMapper implements Mapper<Movie, Set<Actor>, Actor, Tuple<Actor,
 
         for (int i = 0; i < count; ++i)
             for (int j = 0; j < count; ++j)
-                if (i != j) {
-                    //System.out.printf("<%6d, <%6d, %2.2f>>\n", actors[i].getId(), actors[j].getId(), initialRank);
+                if (i != j)
                     collector.collect(actors[i], new Tuple<>(actors[j], initialRank));
-                }
     }
 }
