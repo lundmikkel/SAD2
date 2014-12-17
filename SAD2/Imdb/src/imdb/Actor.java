@@ -27,11 +27,6 @@ public class Actor extends Person {
 
     public Actor(int id, String firstName, String lastName, Gender gender, int movieCount) {
         super(id, firstName, lastName);
-        if (id < 0)
-            throw new IllegalArgumentException("id must be non-negative");
-        if (movieCount < 0)
-            throw new IllegalArgumentException("movieCount must be non-negative");
-
 
         // Set private fields
         this.gender = gender;
@@ -70,8 +65,6 @@ public class Actor extends Person {
     //region Adders
 
     public boolean addRole(Role role) {
-        if (role == null)
-            throw new IllegalArgumentException("role cannot be null");
         return roles.add(role);
     }
 

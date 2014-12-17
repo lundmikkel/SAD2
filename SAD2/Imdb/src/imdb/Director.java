@@ -37,20 +37,13 @@ public class Director extends Person {
     //region Adders
 
     public boolean addGenre(String genre) {
-        if (genre == null)
-            throw new IllegalArgumentException("genre cannot be null");
         return genres.add(genre);
     }
 
     public boolean addMovie(Movie movie) {
-        if (movie == null)
-            throw new IllegalArgumentException("movie cannot be null");
-
         boolean result = movies.add(movie);
-
         if (result)
             movie.addDirector(this);
-
         return result;
     }
 
