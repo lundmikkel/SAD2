@@ -58,8 +58,8 @@ public class Knapsack {
         public ArrayCache(int X, int Y, int Z) {
             cache = new double[X + 1][Y + 1][Z + 1];
 
-            for (int y = 0; y < Y; ++y) {
-                for (int x = 0; x < X; ++x) {
+            for (int y = 0; y <= Y; ++y) {
+                for (int x = 0; x <= X; ++x) {
                     Arrays.fill(cache[x][y], Double.NaN);
                 }
             }
@@ -67,7 +67,7 @@ public class Knapsack {
 
         @Override
         public boolean contains(int x, int y, int z) {
-            return Double.isNaN(cache[x][y][z]);
+            return !Double.isNaN(cache[x][y][z]);
         }
 
         @Override
